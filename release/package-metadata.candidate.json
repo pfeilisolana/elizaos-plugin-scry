@@ -1,0 +1,10 @@
+{
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pfeilisolana/elizaos-plugin-scry.git"
+  },
+  "homepage": "https://github.com/pfeilisolana/elizaos-plugin-scry#readme",
+  "bugs": {
+    "url": "https://github.com/pfeilisolana/elizaos-plugin-scry/issues"
+  }
+}

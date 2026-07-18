@@ -1,0 +1,1255 @@
+{
+  "contracts": [
+    {
+      "exportName": "validateWalletQuickFlag",
+      "key": "walletQuickFlag",
+      "outputSchema": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "coverage": {
+            "type": "object"
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "in_db": {
+            "type": "boolean"
+          },
+          "methodology": {
+            "const": "scry_wallet_quick_flag_v1",
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_wallet_quick_flag",
+            "type": "string"
+          },
+          "quick_flags": {
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "status",
+          "product",
+          "address",
+          "in_db",
+          "supported",
+          "quick_flags",
+          "coverage",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/wallet/:address/quick-flag",
+      "priceUsd": 0.001,
+      "product": "scry_wallet_quick_flag"
+    },
+    {
+      "exportName": "validateWalletForensics",
+      "key": "walletForensics",
+      "outputSchema": {
+        "properties": {
+          "activity": {
+            "description": "Recent wallet balance and transaction-success fingerprint.",
+            "type": "object"
+          },
+          "address": {
+            "description": "Queried Solana wallet address.",
+            "type": "string"
+          },
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "description": "Response evidence timestamp.",
+            "type": "string"
+          },
+          "bundler": {
+            "description": "Bundler/tip-service pattern summary.",
+            "type": "object"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "clusters": {
+            "description": "Cluster memberships and related wallet context.",
+            "type": "array"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "coordination_peers": {
+            "description": "Wallets with joint-trigger or coordinated activity behavior.",
+            "type": "array"
+          },
+          "coverage": {
+            "properties": {
+              "confidence": {
+                "type": "number"
+              },
+              "coverage_status": {
+                "enum": [
+                  "deep",
+                  "medium",
+                  "shallow",
+                  "unavailable"
+                ],
+                "type": "string"
+              },
+              "last_scanned_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_fields": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "warnings": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "deep_tx_evidence": {
+            "description": "Cached onchain onchain-transaction-read transaction evidence summary. Raw transactions are not returned; this is forensic context for caller-defined policies.",
+            "type": "object"
+          },
+          "evidence_pack": {
+            "description": "Machine-readable evidence contract for caller-defined policies.",
+            "type": "object"
+          },
+          "funding_trace": {
+            "description": "Funding lineage edges known to Scry.",
+            "type": "array"
+          },
+          "holdings_snapshot": {
+            "description": "Latest premium holdings snapshot when available for featured or recently refreshed wallets.",
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "identity": {
+            "description": "Known labels, handles, or entity hints when available.",
+            "type": "object"
+          },
+          "in_db": {
+            "description": "Whether this wallet is currently in Scry coverage.",
+            "type": "boolean"
+          },
+          "methodology": {
+            "const": "sentinel_x402_wallet_forensics_v1",
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_wallet_forensics",
+            "type": "string"
+          },
+          "red_flags": {
+            "description": "Structured advisory flags.",
+            "type": "object"
+          },
+          "risk_summary": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "explanation": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "sniper_risk_context": {
+            "description": "Sniper/MEV/bundler cohort context exposed as risk-pattern evidence only. Stage-1 forward-return testing did not support execution use.",
+            "type": "object"
+          },
+          "sol_flows": {
+            "description": "Native SOL top destinations and funding sources.",
+            "type": "object"
+          },
+          "source_updated_at": {
+            "description": "Latest source update timestamp.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sources": {
+            "description": "Named data sources used in this response.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "description": "False for known infrastructure/CEX/system wallets.",
+            "type": "boolean"
+          },
+          "trading_profile": {
+            "description": "Canonical wallet trading profile, including PnL/classification/sample size when available.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "product",
+          "address",
+          "in_db",
+          "supported",
+          "risk_summary",
+          "coverage",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/wallet/:address/forensics",
+      "priceUsd": 0.05,
+      "product": "scry_wallet_forensics"
+    },
+    {
+      "exportName": "validateWalletLineage",
+      "key": "walletLineage",
+      "outputSchema": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "coverage": {
+            "type": "object"
+          },
+          "depth_reached": {
+            "type": "number"
+          },
+          "evidence_contract_version": {
+            "const": "scry_lineage_edge_evidence_v2",
+            "type": "string"
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "in_db": {
+            "type": "boolean"
+          },
+          "lineage": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "lineage_available": {
+            "type": "boolean"
+          },
+          "loop_detected": {
+            "type": "boolean"
+          },
+          "methodology": {
+            "const": "scry_wallet_lineage_cache_v1",
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_wallet_lineage",
+            "type": "string"
+          },
+          "source_updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "terminal_funder": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "wallet": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "product",
+          "address",
+          "lineage_available",
+          "lineage",
+          "coverage",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/wallet/:address/lineage",
+      "priceUsd": 0.03,
+      "product": "scry_wallet_lineage"
+    },
+    {
+      "exportName": "validateLaunchWindowCluster",
+      "key": "launchWindowCluster",
+      "outputSchema": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "type": "string"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "coverage": {
+            "type": "object"
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "execution_window": {
+            "type": "object"
+          },
+          "in_db": {
+            "type": "boolean"
+          },
+          "methodology": {
+            "const": "scry_launch_window_cluster_v1",
+            "type": "string"
+          },
+          "onchain_live_refresh": {
+            "description": "Direct onchain onchain-transfer-read refresh metadata for this response when on-demand freshening is enabled.",
+            "type": "object"
+          },
+          "private_routing_context": {
+            "type": "object"
+          },
+          "product": {
+            "const": "scry_launch_window_cluster",
+            "type": "string"
+          },
+          "relationship_cluster": {
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "wallet": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "product",
+          "address",
+          "supported",
+          "execution_window",
+          "private_routing_context",
+          "relationship_cluster",
+          "coverage",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/wallet/:address/launch-window-cluster",
+      "priceUsd": 0.05,
+      "product": "scry_launch_window_cluster"
+    },
+    {
+      "exportName": "validateFullContextPro",
+      "key": "fullContextPro",
+      "outputSchema": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "context_summary": {
+            "type": "object"
+          },
+          "coverage": {
+            "type": "object"
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "forensics": {
+            "type": "object"
+          },
+          "funding_lineage": {
+            "type": "object"
+          },
+          "launch_window_cluster": {
+            "type": "object"
+          },
+          "methodology": {
+            "const": "scry_wallet_full_context_pro_v1",
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_wallet_full_context_pro",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "transfer_tape": {
+            "type": "object"
+          },
+          "verification_receipts": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "status",
+          "product",
+          "address",
+          "supported",
+          "context_summary",
+          "forensics",
+          "transfer_tape",
+          "funding_lineage",
+          "launch_window_cluster",
+          "coverage",
+          "verification_receipts",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/wallet/:address/full-context-pro",
+      "priceUsd": 0.18,
+      "product": "scry_wallet_full_context_pro"
+    },
+    {
+      "exportName": "validatePersistentWalletsWeekly",
+      "key": "persistentWalletsWeekly",
+      "outputSchema": {
+        "properties": {
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "type": "string"
+          },
+          "buyer_job": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "generated_at": {
+            "type": "string"
+          },
+          "methodology": {
+            "const": "scry_agent_product_weekly_persistent_wallets_v1",
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_weekly_persistent_wallets",
+            "type": "string"
+          },
+          "source_reports": {
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "wallet_count": {
+            "type": "number"
+          },
+          "wallets": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "product",
+          "wallet_count",
+          "wallets",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/solana/persistent-wallets/weekly",
+      "priceUsd": 0.2,
+      "product": "scry_weekly_persistent_wallets"
+    },
+    {
+      "exportName": "validatePumpfunLaunchDossier",
+      "key": "pumpfunLaunchDossier",
+      "outputSchema": {
+        "properties": {
+          "agent_decision_support": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "LOW",
+                  "MID",
+                  "HIGH",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              "decision_options": {
+                "items": {
+                  "properties": {
+                    "cautions": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "option": {
+                      "type": "string"
+                    },
+                    "supporting_evidence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "escalation_triggers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "evidence_summary": {
+                "type": "string"
+              },
+              "posture": {
+                "const": "evidence_only",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "as_of": {
+            "type": "string"
+          },
+          "beta": {
+            "type": "boolean"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "confidence_score": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "coverage": {
+            "type": "object"
+          },
+          "creator_context": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "evidence_pack": {
+            "type": "object"
+          },
+          "launch_preflight": {
+            "type": "object"
+          },
+          "launch_window_evidence": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "methodology": {
+            "const": "scry_pumpfun_launch_dossier_v1_beta",
+            "type": "string"
+          },
+          "mint": {
+            "type": "string"
+          },
+          "product": {
+            "const": "scry_pumpfun_launch_dossier",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spend_rationale": {
+            "properties": {
+              "cheaper_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "explicit_delta_over_daily_plus_weekly": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "more_complete_alternative": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "why_this_cost_is_worth_it": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "partial",
+              "error"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "unsupported_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "product",
+          "mint",
+          "supported",
+          "launch_preflight",
+          "creator_context",
+          "launch_window_evidence",
+          "coverage",
+          "evidence_pack",
+          "agent_decision_support",
+          "spend_rationale",
+          "methodology"
+        ],
+        "type": "object"
+      },
+      "path": "/x402/pumpfun/launch-dossier",
+      "priceUsd": 0.3,
+      "product": "scry_pumpfun_launch_dossier"
+    }
+  ],
+  "contractsSha256": "1655aebb996853fe9491f6a2c7eb1714902e6168c3f680eddde37ceb22dd2782",
+  "schemaVersion": 1,
+  "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
+}

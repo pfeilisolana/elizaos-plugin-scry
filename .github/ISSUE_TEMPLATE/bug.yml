@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible plugin defect without payment or credential material.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Never include wallet keys, seed phrases, payment payloads, recipient fields, credentials,
+        or private production response bodies. Use private vulnerability reporting for security
+        issues.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime versions
+      description: Node.js and @elizaos/core versions.
+      placeholder: Node 22.x, @elizaos/core 1.7.2
+    validations:
+      required: true
+  - type: dropdown
+    id: payment_mode
+    attributes:
+      label: Payment mode
+      options:
+        - quote-only
+        - x402 with host-enforced ceiling
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use synthetic addresses and sanitized responses only.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed all secrets, payment payloads, recipient fields, and private response data.
+          required: true
+        - label: I did not perform a paid live request solely to create this report.
+          required: true

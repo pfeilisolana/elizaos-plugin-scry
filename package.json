@@ -1,0 +1,105 @@
+{
+  "name": "elizaos-plugin-scry",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Budget-safe ElizaOS actions for Scry Solana wallet, mint, cohort, and funding evidence over x402",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "check": "npm run contracts:test && npm run release:readiness:test && npm run release:registry-test && npm run contracts:verify && npm run typecheck && npm run lint && npm test && npm run build",
+    "contracts:check": "node scripts/scry-contracts.mjs check",
+    "contracts:sync": "node scripts/scry-contracts.mjs sync",
+    "contracts:test": "node scripts/test-scry-contracts.mjs",
+    "contracts:verify": "node scripts/scry-contracts.mjs verify",
+    "lint": "biome check .",
+    "prepack": "npm run build",
+    "prebuild": "npm run contracts:verify",
+    "prepublishOnly": "npm run release:publish-gate",
+    "release:check": "npm run check && npm run test:coverage && npm run release:consumer-smoke && npm run contracts:check && npm run release:registry-check && npm run release:staged-check",
+    "release:consumer-smoke": "node scripts/consumer-smoke.mjs",
+    "release:publish-check": "node scripts/release-readiness.mjs publish",
+    "release:publish-gate": "npm run release:publish-check && npm run check && npm run test:coverage && npm run release:consumer-smoke && npm run contracts:check && npm run release:registry-check",
+    "release:readiness:test": "node scripts/test-release-readiness.mjs",
+    "release:registry-check": "node scripts/elizaos-registry-contract.mjs check",
+    "release:registry-context-check": "node scripts/release-readiness.mjs registry",
+    "release:registry-gate": "node scripts/elizaos-registry-contract.mjs registry && npm run release:registry-context-check",
+    "release:registry-test": "node scripts/test-elizaos-registry-contract.mjs",
+    "release:staged-check": "node scripts/release-readiness.mjs staged",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "^1.7.2"
+  },
+  "dependencies": {
+    "@x402/evm": "2.19.0",
+    "@x402/fetch": "2.19.0"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.4",
+    "@elizaos/core": "1.7.2",
+    "@types/node": "20.19.9",
+    "@vitest/coverage-v8": "4.1.10",
+    "ajv": "8.20.0",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "keywords": [
+    "elizaos",
+    "elizaos-plugin",
+    "agent-data",
+    "solana",
+    "scry",
+    "solana-wallet",
+    "solana-wallet-intelligence",
+    "wallet-intelligence",
+    "funding-lineage",
+    "pumpfun",
+    "onchain-data",
+    "x402"
+  ],
+  "license": "MIT",
+  "elizaos": {
+    "plugin": {
+      "displayName": "Scry Wallet Intelligence",
+      "category": "data"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pfeilisolana/elizaos-plugin-scry.git"
+  },
+  "homepage": "https://github.com/pfeilisolana/elizaos-plugin-scry#readme",
+  "bugs": {
+    "url": "https://github.com/pfeilisolana/elizaos-plugin-scry/issues"
+  }
+}

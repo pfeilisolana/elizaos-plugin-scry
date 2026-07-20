@@ -29,13 +29,15 @@ non-200 responses, body stalls, and oversized responses. `npm run release:regist
 requires proof that the exact npm version exists plus the separate registry-PR authority. It never
 publishes or opens a PR.
 
-`npm run release:consumer-smoke` packs the built artifact, installs it with lifecycle scripts
-disabled into an isolated temporary consumer project, imports it without network access, and runs
-one fully offline challenge-to-validated-evidence flow through the packaged Base V2 transport. The
-consumer process removes credential-shaped environment variables and uses an empty temporary npm
-user config before package import or child-process execution. The temporary project and tarball are
-deleted on success or failure. Both the general release check and the publish gate require this
-buyer-boundary proof.
+`npm run release:consumer-smoke` packs the built artifact and the exact installed
+`@elizaos/core@1.7.2` peer into local tarballs, installs both with lifecycle scripts disabled into an
+isolated temporary consumer project, imports the plugin without network access, and runs one fully
+offline challenge-to-validated-evidence flow through the packaged Base V2 transport. Packing the
+peer removes any dependency on ambient registry metadata while preserving npm's peer-resolution
+check. The consumer process removes credential-shaped environment variables and uses an empty
+temporary npm user config before package import or child-process execution. The temporary project
+and tarballs are deleted on success or failure. Both the general release check and the publish gate
+require this buyer-boundary proof.
 
 Publishing and registry submission are separate external writes and require separate explicit
 authorization. A registry entry is not evidence of public listing, installation, selection,

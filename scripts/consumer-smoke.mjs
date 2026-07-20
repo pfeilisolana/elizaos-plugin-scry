@@ -281,6 +281,25 @@ async function main() {
     const tarballName = packed[0]?.filename;
     assert.equal(typeof tarballName, "string");
     const tarball = join(temp, tarballName);
+    const corePackOutput = run(
+      NPM,
+      [
+        "pack",
+        "--json",
+        "--ignore-scripts",
+        "--pack-destination",
+        temp,
+        resolve(ROOT, "node_modules/@elizaos/core"),
+      ],
+      { env: isolatedNpmEnvironment },
+    );
+    const packedCore = JSON.parse(corePackOutput);
+    assert.equal(packedCore.length, 1, "npm pack must produce exactly one core tarball");
+    assert.equal(packedCore[0]?.name, "@elizaos/core");
+    assert.equal(packedCore[0]?.version, "1.7.2");
+    const coreTarballName = packedCore[0]?.filename;
+    assert.equal(typeof coreTarballName, "string");
+    const coreTarball = join(temp, coreTarballName);
     await writeFile(
       join(temp, "package.json"),
       `${JSON.stringify({ name: "scry-consumer-smoke", private: true, type: "module" })}\n`,
@@ -294,7 +313,7 @@ async function main() {
         "--no-audit",
         "--no-fund",
         "--package-lock=false",
-        "@elizaos/core@1.7.2",
+        coreTarball,
         tarball,
       ],
       { cwd: temp, env: isolatedNpmEnvironment },
@@ -302,12 +321,15 @@ async function main() {
     const delivery = await verifyInstalledPackage(temp);
 
     const tarballBytes = await readFile(tarball);
+    const coreTarballBytes = await readFile(coreTarball);
     process.stdout.write(
       `${JSON.stringify({
         schema: "scry.elizaos-consumer-smoke.v1",
         ok: true,
         package: "@scrysolanahub/plugin-scry@0.1.0",
         tarballSha256: createHash("sha256").update(tarballBytes).digest("hex"),
+        hostCore: "@elizaos/core@1.7.2",
+        hostCoreTarballSha256: createHash("sha256").update(coreTarballBytes).digest("hex"),
         importFetches: 0,
         actions: 7,
         transportHttpAttempts: 2,
@@ -315,7 +337,7 @@ async function main() {
         metadataContract: delivery.metadataContract,
         contractProductsDelivered: delivery.contractProductsDelivered,
         contractDeliveryFetches: delivery.contractDeliveryFetches,
-        installMode: "isolated_offline_ignore_scripts",
+        installMode: "isolated_offline_local_peer_tarballs_ignore_scripts",
         credentialEnvironmentSanitized: true,
         credentialEnvironmentKeysRemoved: SCRUBBED_CREDENTIAL_ENVIRONMENT.length,
         isolatedNpmUserConfig: true,

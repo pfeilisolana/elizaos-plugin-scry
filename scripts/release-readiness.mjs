@@ -9,6 +9,15 @@ async function readJson(path) {
   return JSON.parse(await readFile(resolve(ROOT, path), "utf8"));
 }
 
+async function readOptionalBytes(path) {
+  try {
+    return await readFile(resolve(ROOT, path));
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
 function digest(algorithm, value) {
   return createHash(algorithm).update(value).digest("hex");
 }
@@ -44,6 +53,112 @@ function registrySubmissionFilename(packageName) {
   return `${packageName.replace(/^@/, "").replaceAll("/", "__")}.json`;
 }
 
+function jpegDimensions(bytes) {
+  if (!Buffer.isBuffer(bytes) || bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
+    return null;
+  }
+  let offset = 2;
+  while (offset + 3 < bytes.length) {
+    if (bytes[offset] !== 0xff) return null;
+    while (offset < bytes.length && bytes[offset] === 0xff) offset += 1;
+    const marker = bytes[offset];
+    offset += 1;
+    if (marker === 0xd8 || marker === 0xd9) continue;
+    if (marker === 0xda) return null;
+    if (offset + 1 >= bytes.length) return null;
+    const segmentLength = bytes.readUInt16BE(offset);
+    if (segmentLength < 2 || offset + segmentLength > bytes.length) return null;
+    const isStartOfFrame =
+      (marker >= 0xc0 && marker <= 0xc3) ||
+      (marker >= 0xc5 && marker <= 0xc7) ||
+      (marker >= 0xc9 && marker <= 0xcb) ||
+      (marker >= 0xcd && marker <= 0xcf);
+    if (isStartOfFrame) {
+      if (segmentLength < 7) return null;
+      return {
+        height: bytes.readUInt16BE(offset + 3),
+        width: bytes.readUInt16BE(offset + 5),
+      };
+    }
+    offset += segmentLength;
+  }
+  return null;
+}
+
+function assetErrors(name, bytes, contract) {
+  if (!Buffer.isBuffer(bytes)) return [`elizaos_${name}_missing`];
+  const errors = [];
+  const dimensions = jpegDimensions(bytes);
+  if (!dimensions) errors.push(`elizaos_${name}_jpeg_invalid`);
+  if (
+    dimensions &&
+    (dimensions.width !== contract.width || dimensions.height !== contract.height)
+  ) {
+    errors.push(`elizaos_${name}_dimensions_mismatch`);
+  }
+  if (bytes.byteLength > contract.maxBytes) errors.push(`elizaos_${name}_size_exceeded`);
+  if (digest("sha256", bytes) !== contract.sha256) {
+    errors.push(`elizaos_${name}_sha256_mismatch`);
+  }
+  return errors;
+}
+
+function normalizeGithubRepository(repository) {
+  const raw = typeof repository === "string" ? repository : repository?.url;
+  if (typeof raw !== "string") return null;
+  const normalized = raw
+    .trim()
+    .replace(/^github:/, "")
+    .replace(/^git\+/, "")
+    .replace(/^https?:\/\/github\.com\//, "")
+    .replace(/^ssh:\/\/git@github\.com[:/]/, "")
+    .replace(/^git:\/\/github\.com\//, "")
+    .replace(/^git@github\.com:/, "")
+    .replace(/\.git$/, "")
+    .replace(/#.*$/, "");
+  return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(normalized) ? normalized : null;
+}
+
+function registryCandidateFromPackage(packageJson) {
+  const repository = normalizeGithubRepository(packageJson.repository);
+  const packageName = typeof packageJson.name === "string" ? packageJson.name.trim() : "";
+  const declaredKind = packageJson.elizaos?.kind;
+  const kind = ["plugin", "connector", "app"].includes(declaredKind)
+    ? declaredKind
+    : packageName.includes("/app-") || packageName.startsWith("app-")
+      ? "app"
+      : "plugin";
+  const tags = Array.isArray(packageJson.keywords)
+    ? [
+        ...new Set(
+          packageJson.keywords
+            .filter((tag) => typeof tag === "string" && tag.trim())
+            .map((tag) => tag.trim()),
+        ),
+      ]
+    : [];
+  return {
+    package: packageName,
+    ...(repository ? { repository: `github:${repository}` } : {}),
+    kind,
+    ...(typeof packageJson.description === "string" && packageJson.description.trim()
+      ? { description: packageJson.description.trim() }
+      : {}),
+    ...(typeof packageJson.homepage === "string" && packageJson.homepage.trim()
+      ? { homepage: packageJson.homepage.trim() }
+      : {}),
+    ...(typeof packageJson.version === "string" && packageJson.version.trim()
+      ? { version: packageJson.version.trim() }
+      : {}),
+    ...(typeof packageJson.repository === "object" &&
+    typeof packageJson.repository?.directory === "string" &&
+    packageJson.repository.directory.trim()
+      ? { directory: packageJson.repository.directory.trim() }
+      : {}),
+    ...(tags.length > 0 ? { tags } : {}),
+  };
+}
+
 function localErrors({
   mode,
   packageJson,
@@ -53,6 +168,8 @@ function localErrors({
   schema,
   schemaBytes,
   bootstrapWorkflowBytes,
+  logoBytes,
+  bannerBytes,
   env = {},
 }) {
   const errors = registryErrors(candidate, schema);
@@ -83,6 +200,30 @@ function localErrors({
     errors.push("bootstrap_workflow_contract_mismatch");
   }
   if (packageJson.name !== policy.package) errors.push("package_name_mismatch");
+  const packageName = typeof packageJson.name === "string" ? packageJson.name.trim() : "";
+  const packageBasename = packageName.split("/").at(-1) ?? "";
+  if (!packageBasename.startsWith("plugin-")) {
+    errors.push("elizaos_plugin_package_name_mismatch");
+  }
+  if (!packageName.startsWith("@scrysolanahub/")) {
+    errors.push("elizaos_plugin_package_scope_mismatch");
+  }
+  const assetContract = policy.elizaosContract?.registryAssets;
+  if (
+    assetContract?.logo?.path !== "images/logo.jpg" ||
+    assetContract?.logo?.width !== 400 ||
+    assetContract?.logo?.height !== 400 ||
+    assetContract?.logo?.maxBytes !== 500000 ||
+    assetContract?.banner?.path !== "images/banner.jpg" ||
+    assetContract?.banner?.width !== 1280 ||
+    assetContract?.banner?.height !== 640 ||
+    assetContract?.banner?.maxBytes !== 1000000
+  ) {
+    errors.push("elizaos_registry_asset_contract_mismatch");
+  } else {
+    errors.push(...assetErrors("logo", logoBytes, assetContract.logo));
+    errors.push(...assetErrors("banner", bannerBytes, assetContract.banner));
+  }
   if (packageJson.version !== policy.version) errors.push("package_version_mismatch");
   if (candidate.package !== policy.package) errors.push("registry_package_mismatch");
   if (candidate.version !== policy.version) errors.push("registry_version_mismatch");
@@ -90,11 +231,39 @@ function localErrors({
     errors.push("registry_repository_mismatch");
   }
   if (candidate.kind !== "plugin") errors.push("registry_kind_mismatch");
+  if (!same(candidate, registryCandidateFromPackage(packageJson))) {
+    errors.push("registry_candidate_package_projection_mismatch");
+  }
   if (policy.registryContract.submissionFilename !== registrySubmissionFilename(policy.package)) {
     errors.push("registry_submission_filename_mismatch");
   }
   if (policy.registryContract.entryDirectory !== "packages/registry/entries/third-party") {
     errors.push("registry_entry_directory_mismatch");
+  }
+  if (
+    policy.registryContract.generatedRegistryPath !== "packages/registry/generated-registry.json"
+  ) {
+    errors.push("registry_generated_output_path_mismatch");
+  }
+  if (
+    policy.registryContract.generatedWireContract?.supportsV0 !== false ||
+    policy.registryContract.generatedWireContract?.supportsV1 !== false ||
+    policy.registryContract.generatedWireContract?.supportsV2 !== true ||
+    policy.registryContract.generatedWireContract?.currentReleaseEligible !== false
+  ) {
+    errors.push("registry_generated_wire_contract_mismatch");
+  }
+  if (
+    policy.registryContract.generator?.source !==
+      "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts" ||
+    policy.registryContract.generator?.blobSha !== "9019732ee73b127fcc2ffee3a668c576c236325f" ||
+    policy.registryContract.generator?.sha256 !==
+      "e203e85f00d3f8f768a76bff932890d1809fa0efbe33975511748a7305ad2fcc" ||
+    !policy.registryContract.generator?.requiredFragments?.includes(
+      "supports: { v0: false, v1: false, v2: true }",
+    )
+  ) {
+    errors.push("registry_generator_contract_mismatch");
   }
 
   for (const keyword of policy.requiredKeywords) {
@@ -110,6 +279,67 @@ function localErrors({
   }
   if (packageJson.devDependencies?.["@elizaos/core"] !== "1.7.2") {
     errors.push("elizaos_test_pin_mismatch");
+  }
+  if (
+    policy.elizaosContract?.releaseLine !== "stable-v1" ||
+    policy.elizaosContract?.core !== "1.7.2" ||
+    policy.elizaosContract?.cli !== "1.7.2" ||
+    policy.elizaosContract?.npmScope !== "@scrysolanahub" ||
+    policy.elizaosContract?.packageNamePrefix !== "plugin-" ||
+    policy.elizaosContract?.moduleFormat !== "esm-only" ||
+    policy.elizaosContract?.rootExportDefault !== "./dist/index.js" ||
+    policy.elizaosContract?.v2CompatibilityClaimed !== false
+  ) {
+    errors.push("elizaos_release_line_contract_mismatch");
+  }
+  if (
+    packageJson.packageType !== policy.elizaosContract?.packageType ||
+    packageJson.packageType !== "plugin"
+  ) {
+    errors.push("elizaos_package_type_mismatch");
+  }
+  if (
+    packageJson.platform !== policy.elizaosContract?.platform ||
+    packageJson.platform !== "node"
+  ) {
+    errors.push("elizaos_platform_mismatch");
+  }
+  if (
+    packageJson.agentConfig?.pluginType !== policy.elizaosContract?.agentConfigPluginType ||
+    packageJson.agentConfig?.pluginType !== "elizaos:plugin:1.0.0"
+  ) {
+    errors.push("elizaos_agent_config_type_mismatch");
+  }
+  const pluginParameters = packageJson.agentConfig?.pluginParameters;
+  if (
+    policy.elizaosContract?.pluginParameters !== "none" ||
+    !pluginParameters ||
+    typeof pluginParameters !== "object" ||
+    Array.isArray(pluginParameters) ||
+    Object.keys(pluginParameters).length !== 0
+  ) {
+    errors.push("elizaos_agent_config_parameters_mismatch");
+  }
+  if (packageJson.elizaos?.kind !== "plugin") errors.push("elizaos_kind_mismatch");
+  if (packageJson.elizaos?.plugin?.displayName !== "Scry Wallet Intelligence") {
+    errors.push("elizaos_display_name_mismatch");
+  }
+  if (packageJson.elizaos?.plugin?.category !== "data") {
+    errors.push("elizaos_category_mismatch");
+  }
+  if (packageJson.exports?.["./package.json"] !== "./package.json") {
+    errors.push("package_json_export_missing");
+  }
+  const rootExport = packageJson.exports?.["."];
+  if (
+    rootExport?.types !== "./dist/index.d.ts" ||
+    rootExport?.import !== "./dist/index.js" ||
+    rootExport?.default !== policy.elizaosContract?.rootExportDefault
+  ) {
+    errors.push("elizaos_esm_export_mismatch");
+  }
+  if (rootExport?.require !== undefined) {
+    errors.push("elizaos_cjs_export_must_be_absent");
   }
   if (packageJson.dependencies?.["@x402/fetch"] !== "2.19.0") {
     errors.push("x402_fetch_pin_mismatch");
@@ -159,6 +389,9 @@ function localErrors({
       }
       if (env.GITHUB_ACTIONS !== "true") errors.push("github_actions_context_missing");
     } else {
+      if (policy.elizaosContract?.v2CompatibilityClaimed !== true) {
+        errors.push("registry_v2_runtime_compatibility_not_proven");
+      }
       if (env.SCRY_REGISTRY_AUTHORITY !== policy.authorities.registryPullRequest) {
         errors.push("registry_authority_missing");
       }
@@ -211,6 +444,10 @@ async function loadInputs(mode, env = process.env) {
       readFile(resolve(ROOT, "release/registry-entry.schema.json")),
       readFile(resolve(ROOT, ".github/workflows/bootstrap-publish.yml")),
     ]);
+  const [logoBytes, bannerBytes] = await Promise.all([
+    readOptionalBytes(policy.elizaosContract.registryAssets.logo.path),
+    readOptionalBytes(policy.elizaosContract.registryAssets.banner.path),
+  ]);
   return {
     mode,
     packageJson,
@@ -220,6 +457,8 @@ async function loadInputs(mode, env = process.env) {
     schema: JSON.parse(schemaBytes.toString("utf8")),
     schemaBytes,
     bootstrapWorkflowBytes,
+    logoBytes,
+    bannerBytes,
     env,
   };
 }
@@ -238,8 +477,10 @@ export {
   buildReceipt,
   digest,
   gitBlobSha,
+  jpegDimensions,
   loadInputs,
   localErrors,
+  registryCandidateFromPackage,
   registryErrors,
   registrySubmissionFilename,
 };

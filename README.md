@@ -1,8 +1,8 @@
 # ElizaOS Plugin for Scry
 
-Evidence-only ElizaOS actions for Scry's Solana wallet, mint, and cohort products. This repository is
-staged and deliberately marked `private`; it has not been published to npm or submitted to a
-registry.
+Evidence-only ElizaOS actions for Scry's Solana wallet, mint, and cohort products. This public
+repository contains the `0.1.0` release candidate. The npm package remains locked with
+`private: true`; it has not been published or submitted to the ElizaOS registry.
 
 ## Safety model
 
@@ -22,6 +22,8 @@ registry.
   ambiguous. Review the host wallet before creating a fresh client and budget.
 - Each action performs at most one transport call. The included Base transport permits exactly one
   unpaid challenge request and one paid retry; it rejects any third HTTP attempt.
+- When the ElizaOS host provides a callback, each action emits exactly one bounded user-facing
+  result while retaining the validated structured evidence in the action result.
 - Requests are restricted to the seven exact canonical Scry product routes and their declared
   wallet, mint, or parameterless input shape.
 - The deadline covers headers and the complete response body. Chunked and decompressed bytes are
@@ -47,12 +49,31 @@ registry.
 Prices and response contracts are pinned to Scry's public discovery manifest and rechecked by the
 release gate. Runtime contract validation fails closed if the service response diverges.
 
+## Compatibility and installation
+
+This `0.1.x` line targets the current stable ElizaOS v1 runtime: `@elizaos/core` `1.7.2`. CI tests
+Node.js 20, 22, and 24. ElizaOS 2.x/alpha compatibility is not claimed by this release line. The
+package is ESM-only; CommonJS hosts must load it with dynamic `import()` rather than `require()`.
+
+The package declares no environment variables or plugin secrets. Its `agentConfig` is intentionally
+empty because quote-only mode needs no credentials and paid mode accepts only a host-owned signer
+object in code; never place a wallet key in an environment variable for this plugin.
+
+After the separately authorized first npm release, install the package with its stable peer:
+
+```sh
+npm install @scrysolanahub/plugin-scry @elizaos/core@^1.7.2
+```
+
+Until then, this repository remains a public release candidate and the npm command above is not
+expected to resolve.
+
 ## Usage
 
 Quote-only is the default and safest integration:
 
 ```ts
-import scryPlugin from "elizaos-plugin-scry";
+import scryPlugin from "@scrysolanahub/plugin-scry";
 
 // Add this object to the ProjectAgent.plugins array in the host application.
 export const plugins = [scryPlugin];
@@ -66,7 +87,7 @@ import {
   createScryBaseX402Transport,
   createScryPlugin,
   SCRY_BUDGET_PROFILES,
-} from "elizaos-plugin-scry";
+} from "@scrysolanahub/plugin-scry";
 
 // Obtain this from the host wallet subsystem. A viem LocalAccount is compatible.
 const evmSigner = hostWallet.getEvmSigner();

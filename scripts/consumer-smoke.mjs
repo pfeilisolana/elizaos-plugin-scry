@@ -15,6 +15,20 @@ const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const CONTRACT_SNAPSHOT = JSON.parse(
   await readFile(resolve(ROOT, "contracts/scry-wallet-contracts.json"), "utf8"),
 );
+const CREDENTIAL_ENVIRONMENT_NAME =
+  /(TOKEN|SECRET|PASSWORD|PASSPHRASE|PRIVATE|CREDENTIAL|AUTH|API_KEY|ACCESS_KEY|MNEMONIC|SEED)/i;
+
+function scrubCredentialEnvironment() {
+  const removed = [];
+  for (const key of Object.keys(process.env)) {
+    if (!CREDENTIAL_ENVIRONMENT_NAME.test(key)) continue;
+    delete process.env[key];
+    removed.push(key);
+  }
+  return removed.sort();
+}
+
+const SCRUBBED_CREDENTIAL_ENVIRONMENT = scrubCredentialEnvironment();
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -25,6 +39,7 @@ function run(command, args, options = {}) {
       npm_config_audit: "false",
       npm_config_fund: "false",
       npm_config_update_notifier: "false",
+      ...(options.env ?? {}),
     },
     maxBuffer: 16 * 1024 * 1024,
   });
@@ -145,6 +160,25 @@ function contractEvidenceFor(definition, subject) {
 }
 
 async function verifyInstalledPackage(consumerDir) {
+  const installedPackageJson = JSON.parse(
+    await readFile(
+      join(consumerDir, "node_modules/@scrysolanahub/plugin-scry/package.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(installedPackageJson.packageType, "plugin");
+  assert.equal(installedPackageJson.platform, "node");
+  assert.deepEqual(installedPackageJson.agentConfig, {
+    pluginType: "elizaos:plugin:1.0.0",
+    pluginParameters: {},
+  });
+  assert.equal(installedPackageJson.exports?.["./package.json"], "./package.json");
+  assert.deepEqual(installedPackageJson.exports?.["."], {
+    types: "./dist/index.d.ts",
+    import: "./dist/index.js",
+    default: "./dist/index.js",
+  });
+
   let importFetches = 0;
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => {
@@ -155,7 +189,7 @@ async function verifyInstalledPackage(consumerDir) {
   let pluginPackage;
   try {
     pluginPackage = await import(
-      `${pathToFileURL(join(consumerDir, "node_modules/elizaos-plugin-scry/dist/index.js")).href}?smoke=${Date.now()}`
+      `${pathToFileURL(join(consumerDir, "node_modules/@scrysolanahub/plugin-scry/dist/index.js")).href}?smoke=${Date.now()}`
     );
   } finally {
     globalThis.fetch = originalFetch;
@@ -228,13 +262,20 @@ async function verifyInstalledPackage(consumerDir) {
   }
   assert.equal(contractProductsDelivered, 7);
   assert.equal(contractDeliveryFetches, 7);
-  return { contractDeliveryFetches, contractProductsDelivered };
+  return { contractDeliveryFetches, contractProductsDelivered, metadataContract: true };
 }
 
 async function main() {
   const temp = await mkdtemp(join(tmpdir(), "scry-consumer-smoke-"));
   try {
-    const packOutput = run(NPM, ["pack", "--json", "--ignore-scripts", "--pack-destination", temp]);
+    const isolatedNpmrc = join(temp, ".npmrc");
+    await writeFile(isolatedNpmrc, "");
+    const isolatedNpmEnvironment = { npm_config_userconfig: isolatedNpmrc };
+    const packOutput = run(
+      NPM,
+      ["pack", "--json", "--ignore-scripts", "--pack-destination", temp],
+      { env: isolatedNpmEnvironment },
+    );
     const packed = JSON.parse(packOutput);
     assert.equal(packed.length, 1, "npm pack must produce exactly one tarball");
     const tarballName = packed[0]?.filename;
@@ -256,7 +297,7 @@ async function main() {
         "@elizaos/core@1.7.2",
         tarball,
       ],
-      { cwd: temp },
+      { cwd: temp, env: isolatedNpmEnvironment },
     );
     const delivery = await verifyInstalledPackage(temp);
 
@@ -265,15 +306,19 @@ async function main() {
       `${JSON.stringify({
         schema: "scry.elizaos-consumer-smoke.v1",
         ok: true,
-        package: "elizaos-plugin-scry@0.1.0",
+        package: "@scrysolanahub/plugin-scry@0.1.0",
         tarballSha256: createHash("sha256").update(tarballBytes).digest("hex"),
         importFetches: 0,
         actions: 7,
         transportHttpAttempts: 2,
         deliveredEvidence: true,
+        metadataContract: delivery.metadataContract,
         contractProductsDelivered: delivery.contractProductsDelivered,
         contractDeliveryFetches: delivery.contractDeliveryFetches,
         installMode: "isolated_offline_ignore_scripts",
+        credentialEnvironmentSanitized: true,
+        credentialEnvironmentKeysRemoved: SCRUBBED_CREDENTIAL_ENVIRONMENT.length,
+        isolatedNpmUserConfig: true,
         network: false,
         workspacePersistentWrites: false,
         tempCleanup: true,

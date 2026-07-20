@@ -1,9 +1,22 @@
 {
-  "package": "elizaos-plugin-scry",
+  "package": "@scrysolanahub/plugin-scry",
   "repository": "github:pfeilisolana/elizaos-plugin-scry",
   "kind": "plugin",
-  "description": "Budget-safe ElizaOS actions for Scry Solana wallet, mint, cohort, and funding evidence over x402.",
+  "description": "Budget-safe ElizaOS actions for Scry Solana wallet, mint, cohort, and funding evidence over x402",
   "homepage": "https://github.com/pfeilisolana/elizaos-plugin-scry#readme",
   "version": "0.1.0",
-  "tags": ["solana", "x402", "wallet-intelligence", "mint-intelligence", "cohort-data", "data"]
+  "tags": [
+    "elizaos",
+    "elizaos-plugin",
+    "agent-data",
+    "solana",
+    "scry",
+    "solana-wallet",
+    "solana-wallet-intelligence",
+    "wallet-intelligence",
+    "funding-lineage",
+    "pumpfun",
+    "onchain-data",
+    "x402"
+  ]
 }

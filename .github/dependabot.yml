@@ -14,9 +14,13 @@ updates:
         update-types:
           - minor
           - patch
-    labels:
-      - dependencies
-      - security
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
@@ -26,6 +30,3 @@ updates:
       time: "06:27"
       timezone: Europe/Berlin
     open-pull-requests-limit: 3
-    labels:
-      - dependencies
-      - security

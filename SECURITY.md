@@ -44,5 +44,4 @@ widening x402 versions or downgrading the framework to suppress an audit is not 
 
 Use GitHub private vulnerability reporting for the canonical public repository. Do not open a
 public issue for a suspected vulnerability and do not include live credentials, payment payloads,
-recipient fields, or private wallet material in any report. Until the public repository exists,
-retain the report locally rather than sending sensitive details through an unverified channel.
+recipient fields, or private wallet material in any report.

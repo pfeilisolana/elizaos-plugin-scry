@@ -61,7 +61,13 @@ async function fetchBounded(
   }
 }
 
-function contractErrors({ policy, localSchemaBytes, remoteSchemaBytes, remoteReadmeBytes }) {
+function contractErrors({
+  policy,
+  localSchemaBytes,
+  remoteSchemaBytes,
+  remoteReadmeBytes,
+  remoteGeneratorBytes,
+}) {
   const errors = [];
   const contract = policy.registryContract;
 
@@ -79,8 +85,15 @@ function contractErrors({ policy, localSchemaBytes, remoteSchemaBytes, remoteRea
   if (gitBlobSha(remoteReadmeBytes) !== contract.readme.blobSha) {
     errors.push("upstream_readme_git_blob_mismatch");
   }
+  if (digest("sha256", remoteGeneratorBytes) !== contract.generator.sha256) {
+    errors.push("upstream_generator_sha256_mismatch");
+  }
+  if (gitBlobSha(remoteGeneratorBytes) !== contract.generator.blobSha) {
+    errors.push("upstream_generator_git_blob_mismatch");
+  }
 
   let readme = "";
+  let generator = "";
   try {
     JSON.parse(decodeUtf8(remoteSchemaBytes));
   } catch {
@@ -91,8 +104,16 @@ function contractErrors({ policy, localSchemaBytes, remoteSchemaBytes, remoteRea
   } catch {
     errors.push("upstream_readme_invalid_utf8");
   }
+  try {
+    generator = decodeUtf8(remoteGeneratorBytes);
+  } catch {
+    errors.push("upstream_generator_invalid_utf8");
+  }
   for (const fragment of contract.requiredReadmeFragments) {
     if (!readme.includes(fragment)) errors.push(`upstream_readme_missing:${fragment}`);
+  }
+  for (const fragment of contract.generator.requiredFragments) {
+    if (!generator.includes(fragment)) errors.push(`upstream_generator_missing:${fragment}`);
   }
   return [...new Set(errors)].sort();
 }
@@ -128,14 +149,22 @@ async function buildContractReceipt(options = {}) {
   const errors = [];
   let remoteSchemaBytes;
   let remoteReadmeBytes;
+  let remoteGeneratorBytes;
   let metadata;
   try {
-    [remoteSchemaBytes, remoteReadmeBytes] = await Promise.all([
+    [remoteSchemaBytes, remoteReadmeBytes, remoteGeneratorBytes] = await Promise.all([
       fetchBounded(contract.schema.source, { fetchImpl }),
       fetchBounded(contract.readme.source, { fetchImpl }),
+      fetchBounded(contract.generator.source, { fetchImpl }),
     ]);
     errors.push(
-      ...contractErrors({ policy, localSchemaBytes, remoteSchemaBytes, remoteReadmeBytes }),
+      ...contractErrors({
+        policy,
+        localSchemaBytes,
+        remoteSchemaBytes,
+        remoteReadmeBytes,
+        remoteGeneratorBytes,
+      }),
     );
     if (requirePublished) {
       const npmUrl = `https://registry.npmjs.org/${encodeURIComponent(policy.package)}/${encodeURIComponent(policy.version)}`;
@@ -162,6 +191,7 @@ async function buildContractReceipt(options = {}) {
     submissionPath: `${contract.entryDirectory}/${contract.submissionFilename}`,
     schemaSha256: remoteSchemaBytes ? digest("sha256", remoteSchemaBytes) : null,
     readmeSha256: remoteReadmeBytes ? digest("sha256", remoteReadmeBytes) : null,
+    generatorSha256: remoteGeneratorBytes ? digest("sha256", remoteGeneratorBytes) : null,
     publishedPackageVerified: requirePublished && uniqueErrors.length === 0,
     errors: uniqueErrors,
     network: true,

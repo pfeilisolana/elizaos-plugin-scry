@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import {
   buildReceipt,
+  jpegDimensions,
   loadInputs,
+  registryCandidateFromPackage,
   registryErrors,
   registrySubmissionFilename,
 } from "./release-readiness.mjs";
@@ -54,10 +56,11 @@ const registry = buildReceipt({
     GITHUB_REPOSITORY: stagedInputs.policy.githubRepository,
   },
 });
-assert.equal(registry.ok, true);
-assert.equal(registry.status, "registry_context_ready");
-assert.equal(registry.registryReady, true);
+assert.equal(registry.ok, false);
+assert.equal(registry.status, "local_contract_failed");
+assert.equal(registry.registryReady, false);
 assert.equal(registry.publishReady, false);
+assert(registry.localErrors.includes("registry_v2_runtime_compatibility_not_proven"));
 
 const registryWithoutAuthority = buildReceipt({
   ...stagedInputs,
@@ -84,22 +87,53 @@ assert.equal(tamperedSchema.ok, false);
 assert(tamperedSchema.localErrors.includes("registry_schema_sha256_mismatch"));
 assert(tamperedSchema.localErrors.includes("registry_schema_git_blob_mismatch"));
 
-const partialMetadata = {
-  ...stagedInputs.packageJson,
-  homepage: stagedInputs.metadata.homepage,
-};
+const partialMetadata = structuredClone(stagedInputs.packageJson);
+delete partialMetadata.repository;
+delete partialMetadata.bugs;
+partialMetadata.homepage = stagedInputs.metadata.homepage;
 const partial = buildReceipt({ ...stagedInputs, packageJson: partialMetadata });
 assert.equal(partial.ok, false);
 assert(partial.localErrors.includes("package_metadata_overlay_partial_or_mismatched"));
 
-assert.equal(registrySubmissionFilename("elizaos-plugin-scry"), "elizaos-plugin-scry.json");
+assert.equal(
+  registrySubmissionFilename("@scrysolanahub/plugin-scry"),
+  "scrysolanahub__plugin-scry.json",
+);
 assert.equal(registrySubmissionFilename("@scope/plugin"), "scope__plugin.json");
+assert.deepEqual(registryCandidateFromPackage(stagedInputs.packageJson), stagedInputs.candidate);
+assert.deepEqual(jpegDimensions(stagedInputs.logoBytes), { width: 400, height: 400 });
+assert.deepEqual(jpegDimensions(stagedInputs.bannerBytes), { width: 1280, height: 640 });
+
+const driftedCandidate = structuredClone(stagedInputs.candidate);
+driftedCandidate.description = `${driftedCandidate.description}.`;
+driftedCandidate.tags = [...driftedCandidate.tags].reverse();
+const candidateDrift = buildReceipt({ ...stagedInputs, candidate: driftedCandidate });
+assert.equal(candidateDrift.ok, false);
+assert(candidateDrift.localErrors.includes("registry_candidate_package_projection_mismatch"));
 
 const wrongSubmissionPolicy = structuredClone(stagedInputs.policy);
 wrongSubmissionPolicy.registryContract.submissionFilename = "wrong.json";
 const wrongSubmission = buildReceipt({ ...stagedInputs, policy: wrongSubmissionPolicy });
 assert.equal(wrongSubmission.ok, false);
 assert(wrongSubmission.localErrors.includes("registry_submission_filename_mismatch"));
+
+const wrongGeneratedPathPolicy = structuredClone(stagedInputs.policy);
+wrongGeneratedPathPolicy.registryContract.generatedRegistryPath = "generated-registry.json";
+const wrongGeneratedPath = buildReceipt({ ...stagedInputs, policy: wrongGeneratedPathPolicy });
+assert.equal(wrongGeneratedPath.ok, false);
+assert(wrongGeneratedPath.localErrors.includes("registry_generated_output_path_mismatch"));
+
+const wrongGeneratedWirePolicy = structuredClone(stagedInputs.policy);
+wrongGeneratedWirePolicy.registryContract.generatedWireContract.supportsV1 = true;
+const wrongGeneratedWire = buildReceipt({ ...stagedInputs, policy: wrongGeneratedWirePolicy });
+assert.equal(wrongGeneratedWire.ok, false);
+assert(wrongGeneratedWire.localErrors.includes("registry_generated_wire_contract_mismatch"));
+
+const wrongGeneratorPolicy = structuredClone(stagedInputs.policy);
+wrongGeneratorPolicy.registryContract.generator.sha256 = "0".repeat(64);
+const wrongGenerator = buildReceipt({ ...stagedInputs, policy: wrongGeneratorPolicy });
+assert.equal(wrongGenerator.ok, false);
+assert(wrongGenerator.localErrors.includes("registry_generator_contract_mismatch"));
 
 const wrongFetchPin = structuredClone(stagedInputs.packageJson);
 wrongFetchPin.dependencies["@x402/fetch"] = "^2.19.0";
@@ -112,6 +146,60 @@ wrongEvmPin.dependencies["@x402/evm"] = "latest";
 const evmPin = buildReceipt({ ...stagedInputs, packageJson: wrongEvmPin });
 assert.equal(evmPin.ok, false);
 assert(evmPin.localErrors.includes("x402_evm_pin_mismatch"));
+
+const invalidElizaMetadata = structuredClone(stagedInputs.packageJson);
+delete invalidElizaMetadata.elizaos.kind;
+delete invalidElizaMetadata.exports["./package.json"];
+invalidElizaMetadata.exports["."].import = "./dist/wrong.js";
+invalidElizaMetadata.exports["."].default = "./dist/wrong.js";
+invalidElizaMetadata.exports["."].require = "./dist/index.cjs";
+delete invalidElizaMetadata.agentConfig;
+delete invalidElizaMetadata.packageType;
+delete invalidElizaMetadata.platform;
+const elizaMetadata = buildReceipt({ ...stagedInputs, packageJson: invalidElizaMetadata });
+assert.equal(elizaMetadata.ok, false);
+assert(elizaMetadata.localErrors.includes("elizaos_kind_mismatch"));
+assert(elizaMetadata.localErrors.includes("package_json_export_missing"));
+assert(elizaMetadata.localErrors.includes("elizaos_esm_export_mismatch"));
+assert(elizaMetadata.localErrors.includes("elizaos_cjs_export_must_be_absent"));
+assert(elizaMetadata.localErrors.includes("elizaos_agent_config_type_mismatch"));
+assert(elizaMetadata.localErrors.includes("elizaos_agent_config_parameters_mismatch"));
+assert(elizaMetadata.localErrors.includes("elizaos_package_type_mismatch"));
+assert(elizaMetadata.localErrors.includes("elizaos_platform_mismatch"));
+
+const invalidElizaPolicy = structuredClone(stagedInputs.policy);
+invalidElizaPolicy.elizaosContract.v2CompatibilityClaimed = true;
+const elizaPolicy = buildReceipt({ ...stagedInputs, policy: invalidElizaPolicy });
+assert.equal(elizaPolicy.ok, false);
+assert(elizaPolicy.localErrors.includes("elizaos_release_line_contract_mismatch"));
+
+const invalidPluginName = structuredClone(stagedInputs.packageJson);
+invalidPluginName.name = "@scrysolanahub/scry";
+const pluginName = buildReceipt({ ...stagedInputs, packageJson: invalidPluginName });
+assert.equal(pluginName.ok, false);
+assert(pluginName.localErrors.includes("elizaos_plugin_package_name_mismatch"));
+
+const invalidPluginScope = structuredClone(stagedInputs.packageJson);
+invalidPluginScope.name = "@unowned/plugin-scry";
+const pluginScope = buildReceipt({ ...stagedInputs, packageJson: invalidPluginScope });
+assert.equal(pluginScope.ok, false);
+assert(pluginScope.localErrors.includes("elizaos_plugin_package_scope_mismatch"));
+
+const missingLogo = buildReceipt({ ...stagedInputs, logoBytes: null });
+assert.equal(missingLogo.ok, false);
+assert(missingLogo.localErrors.includes("elizaos_logo_missing"));
+
+const invalidBanner = buildReceipt({ ...stagedInputs, bannerBytes: Buffer.from("not-a-jpeg") });
+assert.equal(invalidBanner.ok, false);
+assert(invalidBanner.localErrors.includes("elizaos_banner_jpeg_invalid"));
+assert(invalidBanner.localErrors.includes("elizaos_banner_sha256_mismatch"));
+
+const tamperedLogo = buildReceipt({
+  ...stagedInputs,
+  logoBytes: Buffer.concat([stagedInputs.logoBytes, Buffer.from([0])]),
+});
+assert.equal(tamperedLogo.ok, false);
+assert(tamperedLogo.localErrors.includes("elizaos_logo_sha256_mismatch"));
 
 const tamperedBootstrapWorkflow = buildReceipt({
   ...stagedInputs,
@@ -131,5 +219,5 @@ assert(consumerSmoke.localErrors.includes("consumer_smoke_release_gate_missing")
 assert(consumerSmoke.localErrors.includes("consumer_smoke_publish_gate_missing"));
 
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 13 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 28 })}\n`,
 );

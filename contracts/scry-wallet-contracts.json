@@ -287,7 +287,128 @@
             "type": "array"
           },
           "holdings_snapshot": {
-            "description": "Latest premium holdings snapshot when available for featured or recently refreshed wallets.",
+            "description": "Latest holdings snapshot. Exact counts are returned only when snapshot_completeness=complete; bounded scans expose token_count_lower_bound instead.",
+            "properties": {
+              "active_mint_inventory": {
+                "type": "object"
+              },
+              "captured_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "field_coverage": {
+                "type": "object"
+              },
+              "native_balance_sol": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "snapshot_completeness": {
+                "enum": [
+                  "complete",
+                  "bounded_lower_bound",
+                  "unverified"
+                ],
+                "type": "string"
+              },
+              "snapshot_freshness": {
+                "properties": {
+                  "age_seconds": {
+                    "minimum": 0,
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "observed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "stale_gt_30d": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "tier": {
+                    "enum": [
+                      "fresh",
+                      "standard",
+                      "stale",
+                      "unknown"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "token_count": {
+                "description": "Exact token count; null unless snapshot_completeness=complete.",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "token_count_is_lower_bound": {
+                "type": "boolean"
+              },
+              "token_count_lower_bound": {
+                "description": "Observed lower bound; populated only for a bounded lower-bound scan.",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "token_preview_limit": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "tokens": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "tokens_omitted_count": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "tokens_truncated": {
+                "type": "boolean"
+              },
+              "total_value_usd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "warnings": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
             "type": [
               "object",
               "null"
@@ -1249,7 +1370,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "1655aebb996853fe9491f6a2c7eb1714902e6168c3f680eddde37ceb22dd2782",
+  "contractsSha256": "8fae66408cdfde9d15903dc80730dee09cb1506dbca7ed9151c4551cc000e904",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

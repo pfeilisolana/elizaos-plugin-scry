@@ -1,9 +1,39 @@
 {
   "schemaVersion": 1,
-  "package": "elizaos-plugin-scry",
+  "package": "@scrysolanahub/plugin-scry",
   "version": "0.1.0",
   "githubRepository": "pfeilisolana/elizaos-plugin-scry",
   "gitTag": "v0.1.0",
+  "elizaosContract": {
+    "releaseLine": "stable-v1",
+    "core": "1.7.2",
+    "cli": "1.7.2",
+    "npmScope": "@scrysolanahub",
+    "packageNamePrefix": "plugin-",
+    "registryAssets": {
+      "logo": {
+        "path": "images/logo.jpg",
+        "width": 400,
+        "height": 400,
+        "maxBytes": 500000,
+        "sha256": "9dc7b007704d01e8e45602d9cf4a0d9847fed1c75e2bd1285529954c7eba75e1"
+      },
+      "banner": {
+        "path": "images/banner.jpg",
+        "width": 1280,
+        "height": 640,
+        "maxBytes": 1000000,
+        "sha256": "70f0eaba4f327d4c5adecf86db1bc4c96bf7b02ef3129988d77864e05f6d751f"
+      }
+    },
+    "packageType": "plugin",
+    "platform": "node",
+    "moduleFormat": "esm-only",
+    "rootExportDefault": "./dist/index.js",
+    "agentConfigPluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": "none",
+    "v2CompatibilityClaimed": false
+  },
   "authorities": {
     "createRepository": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_CREATE_REPO",
     "firstPublish": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_FIRST_PUBLISH",
@@ -25,7 +55,14 @@
     "repository": "elizaOS/eliza",
     "branch": "develop",
     "entryDirectory": "packages/registry/entries/third-party",
-    "submissionFilename": "elizaos-plugin-scry.json",
+    "submissionFilename": "scrysolanahub__plugin-scry.json",
+    "generatedRegistryPath": "packages/registry/generated-registry.json",
+    "generatedWireContract": {
+      "supportsV0": false,
+      "supportsV1": false,
+      "supportsV2": true,
+      "currentReleaseEligible": false
+    },
     "schema": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/schema/registry-entry.schema.json",
       "blobSha": "346e276709e2d97b0a59c05c18c9c14c78365584",
@@ -36,9 +73,22 @@
       "blobSha": "f9e0f21ab18e6d6c03100324523a2ef58f7ba8d1",
       "sha256": "fcb0af5a8999c809b626c62cb9a2f5114d80c6f37f4bb6ab298edd4778ed9535"
     },
+    "generator": {
+      "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts",
+      "blobSha": "9019732ee73b127fcc2ffee3a668c576c236325f",
+      "sha256": "e203e85f00d3f8f768a76bff932890d1809fa0efbe33975511748a7305ad2fcc",
+      "requiredFragments": [
+        "v1: { branch: null }",
+        "v2: { branch: \"main\" }",
+        "v1: null",
+        "v2: entry.version ?? null",
+        "supports: { v0: false, v1: false, v2: true }"
+      ]
+    },
     "requiredReadmeFragments": [
       "In-repo source of truth for the elizaOS **community plugin registry**.",
       "entries/third-party/",
+      "generated-registry.json",
       "elizaos plugins submit . --dry-run",
       "The runtime auto-discovers any npm package whose `keywords` include `elizaos`",
       "Open a pull request"
@@ -46,7 +96,7 @@
   },
   "bootstrapPublishContract": {
     "workflow": ".github/workflows/bootstrap-publish.yml",
-    "sha256": "535748ead2d4357857a09937738dbb40c94850a2e722898fe5952a44fc5e846c",
+    "sha256": "286215076375c6a37cee208ab94163417e1d2521895b5cad85d16d5bbd553641",
     "version": "0.1.0",
     "tag": "v0.1.0",
     "environment": "npm-production",
@@ -58,7 +108,7 @@
       "id-token: write",
       "test \"$GITHUB_REF_TYPE\" = \"tag\"",
       "test \"$GITHUB_REF_NAME\" = \"v0.1.0\"",
-      "test \"$CONFIRMATION\" = \"elizaos-plugin-scry@0.1.0\"",
+      "test \"$CONFIRMATION\" = \"@scrysolanahub/plugin-scry@0.1.0\"",
       "persist-credentials: false",
       "package-manager-cache: false",
       "npm install --global npm@11.5.1",
@@ -68,14 +118,11 @@
     ]
   },
   "stagedExternalBlockers": [
-    "public_repository_not_created",
     "package_name_not_claimed",
-    "package_metadata_overlay_not_applied",
-    "npm_production_environment_not_configured",
     "npm_bootstrap_token_not_configured",
     "future_trusted_publisher_requires_first_package_version",
-    "official_elizaos_submit_dry_run_not_verified",
-    "create_repository_authority_not_granted",
+    "official_elizaos_plugins_submit_unreleased_or_not_verified",
+    "current_registry_wire_requires_unproven_v2_runtime_compatibility",
     "first_publish_authority_not_granted",
     "registry_pull_request_authority_not_granted"
   ]

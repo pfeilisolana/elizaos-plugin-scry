@@ -1,16 +1,20 @@
 {
-  "name": "elizaos-plugin-scry",
+  "name": "@scrysolanahub/plugin-scry",
   "version": "0.1.0",
   "private": true,
   "description": "Budget-safe ElizaOS actions for Scry Solana wallet, mint, cohort, and funding evidence over x402",
   "type": "module",
+  "packageType": "plugin",
+  "platform": "node",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -84,10 +88,15 @@
   ],
   "license": "MIT",
   "elizaos": {
+    "kind": "plugin",
     "plugin": {
       "displayName": "Scry Wallet Intelligence",
       "category": "data"
     }
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {}
   },
   "publishConfig": {
     "access": "public",

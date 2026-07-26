@@ -5,6 +5,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { isolatedNpmEnvironmentFor } from "./npm-isolation.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const NPM = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -91,22 +92,6 @@ function challenge(required) {
       "payment-required": Buffer.from(JSON.stringify(required)).toString("base64"),
     },
   });
-}
-
-function successEvidence() {
-  return {
-    status: "success",
-    product: "scry_wallet_quick_flag",
-    address: WALLET,
-    in_db: true,
-    supported: true,
-    quick_flags: {},
-    coverage: {},
-    evidence_pack: {},
-    agent_decision_support: {},
-    spend_rationale: {},
-    methodology: "scry_wallet_quick_flag_v1",
-  };
 }
 
 function sampleFromSchema(schema = {}) {
@@ -206,10 +191,15 @@ async function verifyInstalledPackage(consumerDir) {
     const signature = request.headers.get("payment-signature");
     if (!signature) return challenge(required);
     observedPayload = JSON.parse(Buffer.from(signature, "base64").toString("utf8"));
-    return new Response(JSON.stringify(successEvidence()), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify(
+        contractEvidenceFor(pluginPackage.SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG, WALLET),
+      ),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      },
+    );
   };
   const signer = {
     address: "0x1111111111111111111111111111111111111111",
@@ -270,7 +260,7 @@ async function main() {
   try {
     const isolatedNpmrc = join(temp, ".npmrc");
     await writeFile(isolatedNpmrc, "");
-    const isolatedNpmEnvironment = { npm_config_userconfig: isolatedNpmrc };
+    const isolatedNpmEnvironment = isolatedNpmEnvironmentFor(temp);
     const packOutput = run(
       NPM,
       ["pack", "--json", "--ignore-scripts", "--pack-destination", temp],
@@ -343,6 +333,8 @@ async function main() {
         credentialEnvironmentSanitized: true,
         credentialEnvironmentKeysRemoved: SCRUBBED_CREDENTIAL_ENVIRONMENT.length,
         isolatedNpmUserConfig: true,
+        isolatedNpmCache: true,
+        isolatedNpmLogs: true,
         runtimeNetwork: false,
         workspacePersistentWrites: false,
         tempCleanup: true,

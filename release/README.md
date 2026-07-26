@@ -29,7 +29,8 @@ non-200 responses, body stalls, and oversized responses. `npm run release:regist
 requires proof that the exact npm version exists plus the separate registry-PR authority. It never
 publishes or opens a PR.
 
-`npm run release:consumer-smoke` packs the built artifact and the exact installed
+`npm run release:consumer-smoke` uses an isolated temporary npm user config,
+cache, and log directory, then packs the built artifact and the exact installed
 `@elizaos/core@1.7.2` peer into local tarballs, installs both with lifecycle scripts disabled into an
 isolated temporary consumer project, imports the plugin without an external runtime request, and
 runs one controlled challenge-to-validated-evidence flow through the packaged Base V2 transport.

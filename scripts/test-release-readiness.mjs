@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isolatedNpmEnvironmentFor } from "./npm-isolation.mjs";
 import {
   buildReceipt,
   jpegDimensions,
@@ -9,6 +10,13 @@ import {
 } from "./release-readiness.mjs";
 
 const stagedInputs = await loadInputs("staged", {});
+const npmIsolation = isolatedNpmEnvironmentFor("/tmp/scry-consumer-smoke-test");
+assert.deepEqual(npmIsolation, {
+  npm_config_userconfig: "/tmp/scry-consumer-smoke-test/.npmrc",
+  npm_config_cache: "/tmp/scry-consumer-smoke-test/npm-cache",
+  npm_config_logs_dir: "/tmp/scry-consumer-smoke-test/npm-logs",
+});
+assert.throws(() => isolatedNpmEnvironmentFor(""), /non-empty path/);
 const staged = buildReceipt(stagedInputs);
 assert.equal(staged.ok, true);
 assert.equal(staged.status, "staged_private_not_publishable");
@@ -219,5 +227,5 @@ assert(consumerSmoke.localErrors.includes("consumer_smoke_release_gate_missing")
 assert(consumerSmoke.localErrors.includes("consumer_smoke_publish_gate_missing"));
 
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 28 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 30 })}\n`,
 );

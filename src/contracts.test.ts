@@ -8,7 +8,7 @@ const WALLET = "4BdKaxN8G6ka4GYtQQWk4G4dZRUTX2vQH9GcXdBREFUk";
 describe("pinned Scry response contracts", () => {
   it("binds runtime validation to the deterministic manifest snapshot", () => {
     expect(SCRY_CONTRACTS_SHA256).toBe(
-      "8fae66408cdfde9d15903dc80730dee09cb1506dbca7ed9151c4551cc000e904",
+      "f1a7d8d6d4c6adc81b934952c81846a4c853bc28e78cbdf1266b104a25bf6fd3",
     );
   });
 
@@ -39,6 +39,40 @@ describe("pinned Scry response contracts", () => {
     expect(result.valid).toBe(false);
     if (result.valid) throw new Error("Expected posture rejection");
     expect(result.errors).toContain("/agent_decision_support/posture failed const");
+  });
+
+  it("enforces caller-selected evidence pathways", () => {
+    const definition = SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG;
+    const evidence = validEvidenceFor(definition, WALLET);
+    evidence.evidence_pathways = {
+      contract: "scry_evidence_pathways_v1",
+      posture: "auto_upgrade",
+      current_product: definition.product,
+      next_steps: [],
+    };
+
+    const result = validateScryContract(definition.product, evidence);
+
+    expect(result.valid).toBe(false);
+    if (result.valid) throw new Error("Expected pathway-posture rejection");
+    expect(result.errors).toContain("/evidence_pathways/posture failed const");
+  });
+
+  it("enforces paid coverage metadata on premium evidence", () => {
+    const definition = SCRY_PRODUCTS.SCRY_WALLET_FULL_CONTEXT_PRO;
+    const evidence = validEvidenceFor(definition, WALLET);
+    evidence.paid_subject_coverage_sla = {
+      ...(evidence.paid_subject_coverage_sla as Record<string, unknown>),
+      minimum_coverage_status: "shallow",
+    };
+
+    const result = validateScryContract(definition.product, evidence);
+
+    expect(result.valid).toBe(false);
+    if (result.valid) throw new Error("Expected coverage-SLA rejection");
+    expect(result.errors).toContain(
+      "/paid_subject_coverage_sla/minimum_coverage_status failed const",
+    );
   });
 
   it("accepts explicit bounded holdings without promoting the lower bound to an exact count", () => {

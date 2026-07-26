@@ -75,6 +75,48 @@
           "evidence_pack": {
             "type": "object"
           },
+          "evidence_pathways": {
+            "properties": {
+              "contract": {
+                "const": "scry_evidence_pathways_v1",
+                "type": "string"
+              },
+              "current_product": {
+                "type": "string"
+              },
+              "next_steps": {
+                "items": {
+                  "properties": {
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "evidence_delta": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "price_usd": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "use_when": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "posture": {
+                "const": "caller_selects",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
           "in_db": {
             "type": "boolean"
           },
@@ -142,6 +184,7 @@
           "quick_flags",
           "coverage",
           "evidence_pack",
+          "evidence_pathways",
           "agent_decision_support",
           "spend_rationale",
           "methodology"
@@ -785,6 +828,48 @@
           "evidence_pack": {
             "type": "object"
           },
+          "evidence_pathways": {
+            "properties": {
+              "contract": {
+                "const": "scry_evidence_pathways_v1",
+                "type": "string"
+              },
+              "current_product": {
+                "type": "string"
+              },
+              "next_steps": {
+                "items": {
+                  "properties": {
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "evidence_delta": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "price_usd": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "use_when": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "posture": {
+                "const": "caller_selects",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
           "execution_window": {
             "type": "object"
           },
@@ -795,8 +880,137 @@
             "const": "scry_launch_window_cluster_v1",
             "type": "string"
           },
+          "monitoring_delta": {
+            "properties": {
+              "caveat": {
+                "type": "string"
+              },
+              "change_status": {
+                "enum": [
+                  "baseline",
+                  "changed",
+                  "no_change",
+                  "no_change_within_bounded_window"
+                ],
+                "type": "string"
+              },
+              "changes": {
+                "type": "object"
+              },
+              "continuation": {
+                "type": "object"
+              },
+              "contract": {
+                "const": "scry_monitoring_delta_v1",
+                "type": "string"
+              },
+              "mode": {
+                "enum": [
+                  "baseline",
+                  "delta"
+                ],
+                "type": "string"
+              },
+              "observed_window": {
+                "type": "object"
+              },
+              "requested_since_slot": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contract",
+              "mode",
+              "change_status",
+              "requested_since_slot",
+              "observed_window",
+              "changes",
+              "continuation",
+              "caveat"
+            ],
+            "type": "object"
+          },
           "onchain_live_refresh": {
             "description": "Direct onchain onchain-transfer-read refresh metadata for this response when on-demand freshening is enabled.",
+            "type": "object"
+          },
+          "paid_subject_coverage_sla": {
+            "properties": {
+              "contract": {
+                "const": "scry_paid_subject_coverage_sla_v1",
+                "type": "string"
+              },
+              "deepening_trigger": {
+                "enum": [
+                  "successful_settlement",
+                  null
+                ],
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "measurement_stage": {
+                "const": "response_before_settlement",
+                "type": "string"
+              },
+              "minimum_coverage_status": {
+                "const": "medium",
+                "type": "string"
+              },
+              "observed_coverage_status": {
+                "enum": [
+                  "deep",
+                  "medium",
+                  "shallow",
+                  "unavailable"
+                ],
+                "type": "string"
+              },
+              "reason_codes": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "requires_deepening": {
+                "type": "boolean"
+              },
+              "response_status": {
+                "enum": [
+                  "success",
+                  "partial"
+                ],
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "met",
+                  "not_met"
+                ],
+                "type": "string"
+              },
+              "subject_type": {
+                "const": "wallet",
+                "type": "string"
+              }
+            },
+            "required": [
+              "contract",
+              "subject_type",
+              "minimum_coverage_status",
+              "observed_coverage_status",
+              "status",
+              "response_status",
+              "requires_deepening",
+              "deepening_trigger",
+              "measurement_stage",
+              "reason_codes"
+            ],
             "type": "object"
           },
           "private_routing_context": {
@@ -865,10 +1079,13 @@
           "address",
           "supported",
           "execution_window",
+          "monitoring_delta",
           "private_routing_context",
           "relationship_cluster",
           "coverage",
+          "paid_subject_coverage_sla",
           "evidence_pack",
+          "evidence_pathways",
           "agent_decision_support",
           "spend_rationale",
           "methodology"
@@ -954,7 +1171,85 @@
           "coverage": {
             "type": "object"
           },
+          "delivery_quality": {
+            "properties": {
+              "contract": {
+                "const": "scry_full_context_delivery_quality_v1",
+                "type": "string"
+              },
+              "minimum_coverage_status": {
+                "const": "medium",
+                "type": "string"
+              },
+              "reason_codes": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "requires_deepening": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "success",
+                  "partial"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "contract",
+              "minimum_coverage_status",
+              "requires_deepening",
+              "reason_codes"
+            ],
+            "type": "object"
+          },
           "evidence_pack": {
+            "type": "object"
+          },
+          "evidence_pathways": {
+            "properties": {
+              "contract": {
+                "const": "scry_evidence_pathways_v1",
+                "type": "string"
+              },
+              "current_product": {
+                "type": "string"
+              },
+              "next_steps": {
+                "items": {
+                  "properties": {
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "evidence_delta": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "price_usd": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "use_when": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "posture": {
+                "const": "caller_selects",
+                "type": "string"
+              }
+            },
             "type": "object"
           },
           "forensics": {
@@ -969,6 +1264,135 @@
           "methodology": {
             "const": "scry_wallet_full_context_pro_v1",
             "type": "string"
+          },
+          "monitoring_delta": {
+            "properties": {
+              "caveat": {
+                "type": "string"
+              },
+              "change_status": {
+                "enum": [
+                  "baseline",
+                  "changed",
+                  "no_change",
+                  "no_change_within_bounded_window"
+                ],
+                "type": "string"
+              },
+              "changes": {
+                "type": "object"
+              },
+              "continuation": {
+                "type": "object"
+              },
+              "contract": {
+                "const": "scry_monitoring_delta_v1",
+                "type": "string"
+              },
+              "mode": {
+                "enum": [
+                  "baseline",
+                  "delta"
+                ],
+                "type": "string"
+              },
+              "observed_window": {
+                "type": "object"
+              },
+              "requested_since_slot": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contract",
+              "mode",
+              "change_status",
+              "requested_since_slot",
+              "observed_window",
+              "changes",
+              "continuation",
+              "caveat"
+            ],
+            "type": "object"
+          },
+          "paid_subject_coverage_sla": {
+            "properties": {
+              "contract": {
+                "const": "scry_paid_subject_coverage_sla_v1",
+                "type": "string"
+              },
+              "deepening_trigger": {
+                "enum": [
+                  "successful_settlement",
+                  null
+                ],
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "measurement_stage": {
+                "const": "response_before_settlement",
+                "type": "string"
+              },
+              "minimum_coverage_status": {
+                "const": "medium",
+                "type": "string"
+              },
+              "observed_coverage_status": {
+                "enum": [
+                  "deep",
+                  "medium",
+                  "shallow",
+                  "unavailable"
+                ],
+                "type": "string"
+              },
+              "reason_codes": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "requires_deepening": {
+                "type": "boolean"
+              },
+              "response_status": {
+                "enum": [
+                  "success",
+                  "partial"
+                ],
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "met",
+                  "not_met"
+                ],
+                "type": "string"
+              },
+              "subject_type": {
+                "const": "wallet",
+                "type": "string"
+              }
+            },
+            "required": [
+              "contract",
+              "subject_type",
+              "minimum_coverage_status",
+              "observed_coverage_status",
+              "status",
+              "response_status",
+              "requires_deepening",
+              "deepening_trigger",
+              "measurement_stage",
+              "reason_codes"
+            ],
+            "type": "object"
           },
           "product": {
             "const": "scry_wallet_full_context_pro",
@@ -1032,11 +1456,15 @@
           "context_summary",
           "forensics",
           "transfer_tape",
+          "monitoring_delta",
           "funding_lineage",
           "launch_window_cluster",
           "coverage",
+          "delivery_quality",
+          "paid_subject_coverage_sla",
           "verification_receipts",
           "evidence_pack",
+          "evidence_pathways",
           "agent_decision_support",
           "spend_rationale",
           "methodology"
@@ -1370,7 +1798,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "8fae66408cdfde9d15903dc80730dee09cb1506dbca7ed9151c4551cc000e904",
+  "contractsSha256": "f1a7d8d6d4c6adc81b934952c81846a4c853bc28e78cbdf1266b104a25bf6fd3",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

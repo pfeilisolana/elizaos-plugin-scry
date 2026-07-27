@@ -1,19 +1,22 @@
 version: 2
+
+# Routine version updates share one low-noise maintenance PR. Dependabot
+# security updates remain controlled separately by the repository security
+# settings and are not delayed by this schedule.
+multi-ecosystem-groups:
+  monthly-maintenance:
+    schedule:
+      interval: monthly
+      time: "06:17"
+      timezone: Europe/Berlin
+
 updates:
   - package-ecosystem: npm
     directory: /
-    schedule:
-      interval: weekly
-      day: monday
-      time: "06:17"
-      timezone: Europe/Berlin
+    patterns:
+      - "*"
+    multi-ecosystem-group: monthly-maintenance
     open-pull-requests-limit: 5
-    groups:
-      development-minor-patch:
-        dependency-type: development
-        update-types:
-          - minor
-          - patch
     ignore:
       - dependency-name: "@types/node"
         update-types:
@@ -24,9 +27,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: weekly
-      day: monday
-      time: "06:27"
-      timezone: Europe/Berlin
+    patterns:
+      - "*"
+    multi-ecosystem-group: monthly-maintenance
     open-pull-requests-limit: 3

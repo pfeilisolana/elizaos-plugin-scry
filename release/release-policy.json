@@ -96,7 +96,7 @@
   },
   "bootstrapPublishContract": {
     "workflow": ".github/workflows/bootstrap-publish.yml",
-    "sha256": "286215076375c6a37cee208ab94163417e1d2521895b5cad85d16d5bbd553641",
+    "sha256": "f9a8ff87d609d99984ec129d5aa2593b38014988d4bd978779370ddd37089ea6",
     "version": "0.1.0",
     "tag": "v0.1.0",
     "environment": "npm-production",

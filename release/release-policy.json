@@ -65,8 +65,8 @@
     },
     "schema": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/schema/registry-entry.schema.json",
-      "blobSha": "346e276709e2d97b0a59c05c18c9c14c78365584",
-      "sha256": "3c4cb0459a4bc6a82f28cdfa4b70e5d63db1a2a46cd2c815f73da6fa1c45df0d"
+      "blobSha": "262da51f4ac2b98b58b2e130f3914e9494f50256",
+      "sha256": "fcbe8787f596a85a3fbf6f0c2177476003d70602e33ad80daf8b2622814d9ea0"
     },
     "readme": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/README.md",
@@ -75,14 +75,15 @@
     },
     "generator": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts",
-      "blobSha": "9019732ee73b127fcc2ffee3a668c576c236325f",
-      "sha256": "e203e85f00d3f8f768a76bff932890d1809fa0efbe33975511748a7305ad2fcc",
+      "blobSha": "cb9a27c2ece776bd1ba406e6210b7e74d7c069fd",
+      "sha256": "a8c81e5c6ee8534b64005ac29edc449e18ef27935dd97f865ff06d900e5602a2",
       "requiredFragments": [
         "v1: { branch: null }",
         "v2: { branch: \"main\" }",
         "v1: null",
         "v2: entry.version ?? null",
-        "supports: { v0: false, v1: false, v2: true }"
+        "supports: { v0: false, v1: false, v2: true }",
+        "app: entry.app"
       ]
     },
     "requiredReadmeFragments": [

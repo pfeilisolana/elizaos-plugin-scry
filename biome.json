@@ -8,6 +8,7 @@
       "!!node_modules",
       "!!package-lock.json",
       "!!contracts/scry-wallet-contracts.json",
+      "!!release/registry-entry.schema.json",
       "!!src/generated/scry-contract-validators.js"
     ]
   },

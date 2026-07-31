@@ -41,7 +41,12 @@ function same(left, right) {
 }
 
 function registryErrors(candidate, schema) {
-  const validate = new Ajv({ allErrors: true, strict: true }).compile(schema);
+  // The upstream elizaOS schema declares `app` at the root while requiring it
+  // from an `allOf.then` subschema. Keep strict validation everywhere else,
+  // but allow that valid cross-subschema required reference.
+  const validate = new Ajv({ allErrors: true, strict: true, strictRequired: false }).compile(
+    schema,
+  );
   if (validate(candidate)) return [];
   return (validate.errors ?? []).map((error) => {
     const path = error.instancePath || "$";
@@ -256,12 +261,13 @@ function localErrors({
   if (
     policy.registryContract.generator?.source !==
       "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts" ||
-    policy.registryContract.generator?.blobSha !== "9019732ee73b127fcc2ffee3a668c576c236325f" ||
+    policy.registryContract.generator?.blobSha !== "cb9a27c2ece776bd1ba406e6210b7e74d7c069fd" ||
     policy.registryContract.generator?.sha256 !==
-      "e203e85f00d3f8f768a76bff932890d1809fa0efbe33975511748a7305ad2fcc" ||
+      "a8c81e5c6ee8534b64005ac29edc449e18ef27935dd97f865ff06d900e5602a2" ||
     !policy.registryContract.generator?.requiredFragments?.includes(
       "supports: { v0: false, v1: false, v2: true }",
-    )
+    ) ||
+    !policy.registryContract.generator?.requiredFragments?.includes("app: entry.app")
   ) {
     errors.push("registry_generator_contract_mismatch");
   }

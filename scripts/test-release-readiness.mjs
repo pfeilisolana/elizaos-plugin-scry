@@ -87,6 +87,28 @@ assert(
   ),
 );
 
+const pluginWithAppMetadata = {
+  ...stagedInputs.candidate,
+  app: {
+    displayName: "Scry",
+    category: "data",
+    launchType: "external",
+    launchUrl: null,
+    icon: null,
+    capabilities: [],
+  },
+};
+assert(
+  registryErrors(pluginWithAppMetadata, stagedInputs.schema).some((error) => error.includes("not")),
+);
+
+const appWithoutMetadata = { ...stagedInputs.candidate, kind: "app" };
+assert(
+  registryErrors(appWithoutMetadata, stagedInputs.schema).some((error) =>
+    error.includes("required"),
+  ),
+);
+
 const tamperedSchema = buildReceipt({
   ...stagedInputs,
   schemaBytes: Buffer.concat([stagedInputs.schemaBytes, Buffer.from("\n")]),
@@ -227,5 +249,5 @@ assert(consumerSmoke.localErrors.includes("consumer_smoke_release_gate_missing")
 assert(consumerSmoke.localErrors.includes("consumer_smoke_publish_gate_missing"));
 
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 30 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 32 })}\n`,
 );

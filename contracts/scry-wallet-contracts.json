@@ -1021,6 +1021,7 @@
             "type": "string"
           },
           "relationship_cluster": {
+            "description": "Counterparty/edge context including exact-address organization and service matches over the cached history with explicit completeness.",
             "type": "object"
           },
           "sources": {
@@ -1798,7 +1799,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "f1a7d8d6d4c6adc81b934952c81846a4c853bc28e78cbdf1266b104a25bf6fd3",
+  "contractsSha256": "1f09b39f12964d75f99cfef4cb935611c6baa6ea0fedf86467dc3950be01b5e0",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

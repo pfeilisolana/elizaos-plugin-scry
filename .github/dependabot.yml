@@ -17,6 +17,15 @@ updates:
       - "*"
     multi-ecosystem-group: monthly-maintenance
     open-pull-requests-limit: 5
+    # Incident 2026-08-03: separate @x402/evm and @x402/fetch PRs split one
+    # runtime release and tripped the exact-version safety gate. Owner: Codex
+    # Scry lane. Review by 2026-08-31; remove if Dependabot groups these pins
+    # reliably without an explicit rule.
+    groups:
+      x402-runtime:
+        applies-to: version-updates
+        patterns:
+          - "@x402/*"
     ignore:
       - dependency-name: "@types/node"
         update-types:

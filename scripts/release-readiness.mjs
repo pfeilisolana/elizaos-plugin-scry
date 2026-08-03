@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import Ajv from "ajv";
 
 const ROOT = resolve(import.meta.dirname, "..");
+const X402_RUNTIME_VERSION = "2.20.0";
 
 async function readJson(path) {
   return JSON.parse(await readFile(resolve(ROOT, path), "utf8"));
@@ -347,10 +348,10 @@ function localErrors({
   if (rootExport?.require !== undefined) {
     errors.push("elizaos_cjs_export_must_be_absent");
   }
-  if (packageJson.dependencies?.["@x402/fetch"] !== "2.19.0") {
+  if (packageJson.dependencies?.["@x402/fetch"] !== X402_RUNTIME_VERSION) {
     errors.push("x402_fetch_pin_mismatch");
   }
-  if (packageJson.dependencies?.["@x402/evm"] !== "2.19.0") {
+  if (packageJson.dependencies?.["@x402/evm"] !== X402_RUNTIME_VERSION) {
     errors.push("x402_evm_pin_mismatch");
   }
   if (packageJson.scripts?.prepack !== "npm run build") errors.push("prepack_build_gate_missing");

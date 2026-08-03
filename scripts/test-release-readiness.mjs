@@ -166,7 +166,7 @@ assert.equal(wrongGenerator.ok, false);
 assert(wrongGenerator.localErrors.includes("registry_generator_contract_mismatch"));
 
 const wrongFetchPin = structuredClone(stagedInputs.packageJson);
-wrongFetchPin.dependencies["@x402/fetch"] = "^2.19.0";
+wrongFetchPin.dependencies["@x402/fetch"] = "^2.20.0";
 const fetchPin = buildReceipt({ ...stagedInputs, packageJson: wrongFetchPin });
 assert.equal(fetchPin.ok, false);
 assert(fetchPin.localErrors.includes("x402_fetch_pin_mismatch"));

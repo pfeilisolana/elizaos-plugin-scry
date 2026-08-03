@@ -132,7 +132,7 @@ static capability provider returns the same structured routing fields plus lower
 more-complete alternatives. Agents should choose the narrowest product that fully answers the
 request, not the highest-priced product by default.
 
-The included transport is pinned to `@x402/fetch` and `@x402/evm` 2.19.0. It only selects Base
+The included transport is pinned to `@x402/fetch` and `@x402/evm` 2.20.0. It only selects Base
 mainnet (`eip155:8453`) exact USDC requirements, rejects challenge amounts above the declared
 ceiling before signing, requires the canonical Scry URL and Bazaar extension, and verifies that
 the generated payload preserves `resource`, `extensions.bazaar`, and `accepted` exactly.

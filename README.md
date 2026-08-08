@@ -1,8 +1,8 @@
 # ElizaOS Plugin for Scry
 
-Evidence-only ElizaOS actions for Scry's Solana wallet, mint, and cohort products. This public
-repository contains the `0.1.0` release candidate. The npm package remains locked with
-`private: true`; it has not been published or submitted to the ElizaOS registry.
+Evidence-only ElizaOS actions for Scry's Solana wallet, mint, and cohort products. The canonical
+public package is `@scrysolanahub/plugin-scry`; every release remains fail-closed behind the full
+publish gate, an immutable Git tag, npm provenance, and post-publish consumer verification.
 
 ## Safety model
 
@@ -63,14 +63,15 @@ The package declares no environment variables or plugin secrets. Its `agentConfi
 empty because quote-only mode needs no credentials and paid mode accepts only a host-owned signer
 object in code; never place a wallet key in an environment variable for this plugin.
 
-After the separately authorized first npm release, install the package with its stable peer:
+Install the package with its stable peer:
 
 ```sh
 npm install @scrysolanahub/plugin-scry @elizaos/core@^1.7.2
 ```
 
-Until then, this repository remains a public release candidate and the npm command above is not
-expected to resolve.
+The stable `0.1.x` line is deliberately separate from ElizaOS 2.x/alpha. Package availability,
+version, provenance, and the public installation path are verified independently after every
+publish.
 
 ## Usage
 

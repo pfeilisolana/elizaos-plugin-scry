@@ -369,14 +369,10 @@ function localErrors({
   }
 
   const metadataFields = ["repository", "homepage", "bugs"];
-  const applied = metadataFields.filter((field) => packageJson[field] !== undefined);
   if (mode === "staged") {
-    if (packageJson.private !== true) errors.push("staged_private_lock_missing");
-    if (
-      applied.length !== 0 &&
-      !metadataFields.every((field) => same(packageJson[field], metadata[field]))
-    ) {
-      errors.push("package_metadata_overlay_partial_or_mismatched");
+    if (packageJson.private !== false) errors.push("staged_publishable_flag_missing");
+    if (!metadataFields.every((field) => same(packageJson[field], metadata[field]))) {
+      errors.push("package_metadata_mismatch");
     }
   } else if (mode === "publish" || mode === "registry") {
     if (packageJson.private === true) errors.push("publish_private_lock_active");
@@ -424,7 +420,7 @@ function buildReceipt(inputs) {
       errors.length > 0
         ? "local_contract_failed"
         : staged
-          ? "staged_private_not_publishable"
+          ? "staged_public_publish_gated"
           : registry
             ? "registry_context_ready"
             : "publish_context_ready",

@@ -12,8 +12,7 @@ The bootstrap workflow is inert unless all of these conditions hold:
 - environment secret `SCRY_PUBLISH_AUTHORITY` equals the separately approved first-publish token;
 - environment secret `NPM_BOOTSTRAP_TOKEN` contains a narrowly scoped npm credential authorized for
   the first public publish;
-- the package metadata overlay is exact and `private` has been changed to `false` by the separately
-  gated first-publish controller;
+- the tagged package metadata is exact and explicitly declares `private: false`;
 - the full publish, consumer-delivery, contract, registry-drift, audit, and provenance gates pass.
 
 After a successful first publish:

@@ -19,14 +19,12 @@ assert.deepEqual(npmIsolation, {
 assert.throws(() => isolatedNpmEnvironmentFor(""), /non-empty path/);
 const staged = buildReceipt(stagedInputs);
 assert.equal(staged.ok, true);
-assert.equal(staged.status, "staged_private_not_publishable");
-assert.equal(staged.privateLock, true);
+assert.equal(staged.status, "staged_public_publish_gated");
+assert.equal(staged.privateLock, false);
 assert.equal(staged.publishReady, false);
 assert.deepEqual(staged.externalBlockers, stagedInputs.policy.stagedExternalBlockers);
 
 const publishPackage = structuredClone(stagedInputs.packageJson);
-publishPackage.private = false;
-Object.assign(publishPackage, structuredClone(stagedInputs.metadata));
 const publish = buildReceipt({
   ...stagedInputs,
   mode: "publish",
@@ -123,7 +121,7 @@ delete partialMetadata.bugs;
 partialMetadata.homepage = stagedInputs.metadata.homepage;
 const partial = buildReceipt({ ...stagedInputs, packageJson: partialMetadata });
 assert.equal(partial.ok, false);
-assert(partial.localErrors.includes("package_metadata_overlay_partial_or_mismatched"));
+assert(partial.localErrors.includes("package_metadata_mismatch"));
 
 assert.equal(
   registrySubmissionFilename("@scrysolanahub/plugin-scry"),

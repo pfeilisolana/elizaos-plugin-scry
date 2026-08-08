@@ -18,10 +18,10 @@ These files prepare, but do not authorize, an npm publish or ElizaOS registry su
 - `release-policy.json` binds package, version, repository, tag, keywords, upstream contract, and
   separate exact authorities for repository creation, first publish, and registry PR.
 
-`npm run release:staged-check` verifies the private local state and reports all external blockers.
-`npm run release:publish-check` fails closed unless the metadata overlay is applied, `private` is
-false, and the exact GitHub and first-publish authority environment is present. Neither command
-performs a network request or write.
+`npm run release:staged-check` verifies the committed, publishable package metadata while proving
+that no publication can bypass the prepublish gate. `npm run release:publish-check` fails closed
+unless `private` is explicitly false and the exact GitHub tag and first-publish authority
+environment is present. Neither command performs a network request or write.
 
 `npm run release:registry-check` performs a free read-only check against the mutable upstream
 ElizaOS registry schema and README. It rejects byte drift, semantic route drift, invalid UTF-8,

@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24]
+        node: [22, 24]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,14 +31,14 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci --ignore-scripts
-      - if: matrix.node == 20
+      - if: matrix.node == 22
         run: npm audit --audit-level=high
-      - if: matrix.node == 20
+      - if: matrix.node == 22
         run: npm audit --omit=dev --audit-level=low
       - run: npm run check
-      - if: matrix.node == 20
+      - if: matrix.node == 22
         run: npm run test:coverage
-      - if: matrix.node == 20
+      - if: matrix.node == 22
         run: npm run release:consumer-smoke
 
   contract-drift:
@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run contracts:check

@@ -173,6 +173,99 @@
           },
           "supported": {
             "type": "boolean"
+          },
+          "workflow_continuation": {
+            "properties": {
+              "contract": {
+                "const": "scry_workflow_continuation_v1",
+                "type": "string"
+              },
+              "current_product": {
+                "type": "string"
+              },
+              "options": {
+                "items": {
+                  "properties": {
+                    "carries_forward": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "do_not_use_when": {
+                      "type": "string"
+                    },
+                    "example_url": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "minimum_refresh_interval_seconds": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "price_usd": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "purpose": {
+                      "type": "string"
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "requires_new_payment": {
+                      "const": true,
+                      "type": "boolean"
+                    },
+                    "use_when": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "purpose",
+                    "product",
+                    "price_usd",
+                    "method",
+                    "path",
+                    "example_url",
+                    "use_when",
+                    "do_not_use_when",
+                    "requires_new_payment"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "posture": {
+                "const": "caller_selects_no_automatic_purchase",
+                "type": "string"
+              },
+              "stop_conditions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "contract",
+              "posture",
+              "current_product",
+              "options",
+              "stop_conditions"
+            ],
+            "type": "object"
           }
         },
         "required": [
@@ -185,6 +278,7 @@
           "coverage",
           "evidence_pack",
           "evidence_pathways",
+          "workflow_continuation",
           "agent_decision_support",
           "spend_rationale",
           "methodology"
@@ -1447,6 +1541,99 @@
           },
           "verification_receipts": {
             "type": "object"
+          },
+          "workflow_continuation": {
+            "properties": {
+              "contract": {
+                "const": "scry_workflow_continuation_v1",
+                "type": "string"
+              },
+              "current_product": {
+                "type": "string"
+              },
+              "options": {
+                "items": {
+                  "properties": {
+                    "carries_forward": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "do_not_use_when": {
+                      "type": "string"
+                    },
+                    "example_url": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "method": {
+                      "const": "GET",
+                      "type": "string"
+                    },
+                    "minimum_refresh_interval_seconds": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "price_usd": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "purpose": {
+                      "type": "string"
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "requires_new_payment": {
+                      "const": true,
+                      "type": "boolean"
+                    },
+                    "use_when": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "purpose",
+                    "product",
+                    "price_usd",
+                    "method",
+                    "path",
+                    "example_url",
+                    "use_when",
+                    "do_not_use_when",
+                    "requires_new_payment"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "posture": {
+                "const": "caller_selects_no_automatic_purchase",
+                "type": "string"
+              },
+              "stop_conditions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "contract",
+              "posture",
+              "current_product",
+              "options",
+              "stop_conditions"
+            ],
+            "type": "object"
           }
         },
         "required": [
@@ -1466,6 +1653,7 @@
           "verification_receipts",
           "evidence_pack",
           "evidence_pathways",
+          "workflow_continuation",
           "agent_decision_support",
           "spend_rationale",
           "methodology"
@@ -1799,7 +1987,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "1f09b39f12964d75f99cfef4cb935611c6baa6ea0fedf86467dc3950be01b5e0",
+  "contractsSha256": "69044dfdb5440329383390c77631aacf83f5e9eda8346c0af42c31a0ac6d4330",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

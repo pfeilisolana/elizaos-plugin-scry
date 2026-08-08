@@ -2,7 +2,7 @@ import { type ClientEvmSigner, ExactEvmScheme } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { isSolanaAddress } from "./address.js";
 import { SCRY_ORIGIN, SCRY_PRODUCT_LIST } from "./catalog.js";
-import type { ScryFetchTransport } from "./types.js";
+import type { ScryFetchTransport, ScryProductDefinition } from "./types.js";
 
 const BASE_MAINNET = "eip155:8453";
 const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
@@ -38,51 +38,65 @@ function sameJsonValue(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function matchesCanonicalProduct(url: URL): boolean {
-  return SCRY_PRODUCT_LIST.some((product) => {
-    if (product.inputKind === "none") {
-      return url.pathname === product.routeTemplate && url.search === "";
-    }
-    if (product.inputKind === "mint") {
-      const mint = url.searchParams.get("mint");
-      return (
-        url.pathname === product.routeTemplate &&
-        typeof mint === "string" &&
-        isSolanaAddress(mint) &&
-        url.search === `?mint=${mint}` &&
-        [...url.searchParams.keys()].length === 1
-      );
-    }
+function canonicalProduct(url: URL): ScryProductDefinition | null {
+  return (
+    SCRY_PRODUCT_LIST.find((product) => {
+      if (product.inputKind === "none") {
+        return url.pathname === product.routeTemplate && url.search === "";
+      }
+      if (product.inputKind === "mint") {
+        const mint = url.searchParams.get("mint");
+        return (
+          url.pathname === product.routeTemplate &&
+          typeof mint === "string" &&
+          isSolanaAddress(mint) &&
+          url.search === `?mint=${mint}` &&
+          [...url.searchParams.keys()].length === 1
+        );
+      }
 
-    const marker = ":address";
-    const markerIndex = product.routeTemplate.indexOf(marker);
-    if (markerIndex < 0 || url.search !== "") return false;
-    const prefix = product.routeTemplate.slice(0, markerIndex);
-    const suffix = product.routeTemplate.slice(markerIndex + marker.length);
-    if (!url.pathname.startsWith(prefix) || !url.pathname.endsWith(suffix)) return false;
-    const address = url.pathname.slice(prefix.length, url.pathname.length - suffix.length);
-    return isSolanaAddress(address) && url.pathname === `${prefix}${address}${suffix}`;
-  });
+      const marker = ":address";
+      const markerIndex = product.routeTemplate.indexOf(marker);
+      if (markerIndex < 0 || url.search !== "") return false;
+      const prefix = product.routeTemplate.slice(0, markerIndex);
+      const suffix = product.routeTemplate.slice(markerIndex + marker.length);
+      if (!url.pathname.startsWith(prefix) || !url.pathname.endsWith(suffix)) return false;
+      const address = url.pathname.slice(prefix.length, url.pathname.length - suffix.length);
+      return isSolanaAddress(address) && url.pathname === `${prefix}${address}${suffix}`;
+    }) ?? null
+  );
 }
 
-function canonicalScryRequest(input: RequestInfo | URL, init?: RequestInit): Request {
-  const request = new Request(input, init);
-  const url = new URL(request.url);
+function canonicalScryRequest(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): { request: Request; product: ScryProductDefinition } {
+  const incoming = new Request(input, init);
+  const url = new URL(incoming.url);
+  const product = canonicalProduct(url);
 
   if (
-    request.method !== "GET" ||
-    request.body !== null ||
-    request.headers.has("payment-signature") ||
-    request.headers.has("x-payment") ||
+    incoming.method !== "GET" ||
+    incoming.body !== null ||
+    incoming.headers.has("payment-signature") ||
+    incoming.headers.has("x-payment") ||
     url.origin !== SCRY_ORIGIN ||
-    !matchesCanonicalProduct(url)
+    !product
   ) {
     throw new Error("Refusing a non-canonical Scry x402 request");
   }
-  return request;
+  return {
+    product,
+    request: new Request(url, {
+      method: "GET",
+      headers: { accept: "application/json" },
+      redirect: "error",
+      signal: incoming.signal,
+    }),
+  };
 }
 
-function requirementIsWithinCeiling(
+function requirementMatchesPrice(
   requirement: {
     scheme: string;
     network: string;
@@ -91,6 +105,7 @@ function requirementIsWithinCeiling(
     maxTimeoutSeconds: number;
   },
   ceilingMicros: number,
+  expectedMicros: number,
 ): boolean {
   if (
     requirement.scheme !== "exact" ||
@@ -104,7 +119,7 @@ function requirementIsWithinCeiling(
   }
   try {
     const amount = BigInt(requirement.amount);
-    return amount > 0n && amount <= BigInt(ceilingMicros);
+    return amount === BigInt(expectedMicros) && amount <= BigInt(ceilingMicros);
   } catch {
     return false;
   }
@@ -129,8 +144,9 @@ export function createScryBaseX402Transport(
   if (typeof baseFetch !== "function") throw new Error("fetch must be a function");
 
   const paidFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const request = canonicalScryRequest(input, init);
+    const { request, product } = canonicalScryRequest(input, init);
     const expectedUrl = request.url;
+    const expectedMicros = usdMicros(product.priceUsd);
     let attempts = 0;
 
     const guardedFetch = async (
@@ -139,8 +155,9 @@ export function createScryBaseX402Transport(
     ): Promise<Response> => {
       const attempt = new Request(attemptInput, attemptInit);
       attempts += 1;
-      const hasPayment =
-        attempt.headers.has("payment-signature") || attempt.headers.has("x-payment");
+      const paymentSignature = attempt.headers.get("payment-signature");
+      const legacyPayment = attempt.headers.get("x-payment");
+      const hasPayment = Boolean(paymentSignature || legacyPayment);
       if (
         attempts > MAX_HTTP_ATTEMPTS ||
         attempt.url !== expectedUrl ||
@@ -151,14 +168,24 @@ export function createScryBaseX402Transport(
       ) {
         throw new Error("Refusing an unexpected x402 transport attempt");
       }
-      return baseFetch(attempt);
+      const headers = new Headers({ accept: "application/json" });
+      if (paymentSignature) headers.set("payment-signature", paymentSignature);
+      if (legacyPayment) headers.set("x-payment", legacyPayment);
+      return baseFetch(
+        new Request(expectedUrl, {
+          method: "GET",
+          headers,
+          redirect: "error",
+          signal: attempt.signal,
+        }),
+      );
     };
 
     const client = new x402Client()
       .register(BASE_MAINNET, new ExactEvmScheme(options.signer))
       .registerPolicy((_version, requirements) =>
         requirements.filter((requirement) =>
-          requirementIsWithinCeiling(requirement, ceilingMicros),
+          requirementMatchesPrice(requirement, ceilingMicros, expectedMicros),
         ),
       )
       .onBeforePaymentCreation(async ({ paymentRequired, selectedRequirements }) => {
@@ -167,7 +194,7 @@ export function createScryBaseX402Transport(
           paymentRequired.x402Version !== 2 ||
           paymentRequired.resource?.url !== expectedUrl ||
           !isRecord(bazaar) ||
-          !requirementIsWithinCeiling(selectedRequirements, ceilingMicros)
+          !requirementMatchesPrice(selectedRequirements, ceilingMicros, expectedMicros)
         ) {
           return { abort: true, reason: "Scry payment challenge failed local policy" };
         }
@@ -191,5 +218,6 @@ export function createScryBaseX402Transport(
     paymentMode: "x402",
     enforcedMaxPaymentUsd: options.maxPaymentUsd,
     paymentPayloadResource: "payment-required-resource-exact",
+    paymentPriceBinding: "catalog-route-exact",
   };
 }

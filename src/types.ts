@@ -33,6 +33,8 @@ export type ScryFetchTransport =
       paymentMode: "x402";
       /** Host attestation: copy PaymentRequired.resource unchanged into PaymentPayload.resource. */
       paymentPayloadResource: "payment-required-resource-exact";
+      /** Optional strong attestation used by the bundled transport for exact per-route prices. */
+      paymentPriceBinding?: "catalog-route-exact";
     };
 
 export interface ScryPluginOptions {

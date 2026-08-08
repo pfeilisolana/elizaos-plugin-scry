@@ -39,6 +39,7 @@ function x402Transport(fetchImpl: typeof fetch, enforcedMaxPaymentUsd: number) {
     fetch: fetchImpl,
     paymentMode: "x402" as const,
     paymentPayloadResource: "payment-required-resource-exact" as const,
+    paymentPriceBinding: "catalog-route-exact" as const,
   };
 }
 
@@ -305,6 +306,28 @@ describe("Scry client", () => {
     if (!release) throw new Error("Expected the first paid transport call to be pending");
     release(new Response("challenge", { status: 402 }));
     await expect(first).resolves.toMatchObject({ ok: false, status: "payment_required" });
+  });
+
+  it("reserves the full per-request ceiling for an opaque custom x402 transport", async () => {
+    const fake = transport(
+      jsonResponse(validEvidenceFor(SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG, WALLET)),
+    );
+    const client = createScryClient({
+      transport: {
+        fetch: fake.fetch,
+        paymentMode: "x402",
+        enforcedMaxPaymentUsd: 0.3,
+        paymentPayloadResource: "payment-required-resource-exact",
+      },
+      maxPaymentUsd: 0.3,
+      sessionBudgetUsd: 0.6,
+    });
+
+    expect((await client.query(SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG, WALLET)).ok).toBe(true);
+    expect(client.getBudgetState()).toMatchObject({
+      reservedPaymentUsd: 0.3,
+      remainingBudgetUsd: 0.3,
+    });
   });
 
   it("retains a reservation after an ambiguous paid transport failure", async () => {

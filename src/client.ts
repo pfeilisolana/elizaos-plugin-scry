@@ -24,6 +24,7 @@ interface ResolvedOptions {
   paymentMode: "quote-only" | "x402";
   maxPaymentUsd: number;
   maxPaymentMicros: number;
+  exactCatalogPriceBinding: boolean;
   sessionBudgetUsd: number;
   sessionBudgetMicros: number;
   timeoutMs: number;
@@ -98,6 +99,9 @@ function resolveOptions(options: ScryPluginOptions): ResolvedOptions {
     paymentMode,
     maxPaymentUsd,
     maxPaymentMicros,
+    exactCatalogPriceBinding:
+      options.transport?.paymentMode === "x402" &&
+      options.transport.paymentPriceBinding === "catalog-route-exact",
     sessionBudgetUsd,
     sessionBudgetMicros,
     timeoutMs: boundedPositiveInteger(
@@ -349,7 +353,13 @@ export function createScryClient(options: ScryPluginOptions = {}): ScryClient {
             message: `Local per-request ceiling $${formatUsd(resolved.maxPaymentUsd)} is below the $${formatUsd(definition.priceUsd)} product price`,
           };
         }
-        if (reservedPaymentMicros + productPriceMicros > resolved.sessionBudgetMicros) {
+        // Only the bundled route-price-bound transport may reserve the catalog price.
+        // An opaque custom transport could authorize anything up to its attested ceiling,
+        // so charge that full ceiling against the session before it runs.
+        const reservationMicros = resolved.exactCatalogPriceBinding
+          ? productPriceMicros
+          : resolved.maxPaymentMicros;
+        if (reservedPaymentMicros + reservationMicros > resolved.sessionBudgetMicros) {
           return {
             ok: false,
             status: "budget_exceeded",
@@ -360,7 +370,7 @@ export function createScryClient(options: ScryPluginOptions = {}): ScryClient {
         }
         // Reserve synchronously before the opaque payment transport can run. Ambiguous failures
         // retain the reservation because the plugin cannot prove whether settlement occurred.
-        reservedPaymentMicros += productPriceMicros;
+        reservedPaymentMicros += reservationMicros;
       }
 
       const controller = new AbortController();

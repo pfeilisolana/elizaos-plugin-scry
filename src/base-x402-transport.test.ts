@@ -112,7 +112,22 @@ describe("Scry Base x402 transport", () => {
       paymentMode: "x402",
       enforcedMaxPaymentUsd: 0.001,
       paymentPayloadResource: "payment-required-resource-exact",
+      paymentPriceBinding: "catalog-route-exact",
     });
+  });
+
+  it("rejects a higher challenge amount even when it remains below the global ceiling", async () => {
+    const wallet = signer();
+    const network = vi.fn(async () => challenge(paymentRequired({ amount: "50000" })));
+    const transport = createScryBaseX402Transport({
+      signer: wallet,
+      maxPaymentUsd: 0.3,
+      fetch: network as unknown as typeof fetch,
+    });
+
+    await expect(transport.fetch(URL)).rejects.toThrow("filtered out by policies");
+    expect(network).toHaveBeenCalledOnce();
+    expect(wallet.signTypedData).not.toHaveBeenCalled();
   });
 
   it("rejects a challenge above the independent ceiling before signing", async () => {
@@ -228,5 +243,26 @@ describe("Scry Base x402 transport", () => {
         maxPaymentUsd: 0.001,
       }),
     ).toThrow("valid EVM address");
+  });
+
+  it("strips caller headers and enforces redirect errors on direct transport use", async () => {
+    const network = vi.fn(async (input: RequestInfo | URL) => {
+      const request = new Request(input);
+      expect([...request.headers.keys()]).toEqual(["accept"]);
+      expect(request.redirect).toBe("error");
+      return new Response('{"ok":true}', { status: 200 });
+    });
+    const transport = createScryBaseX402Transport({
+      signer: signer(),
+      maxPaymentUsd: 0.001,
+      fetch: network as unknown as typeof fetch,
+    });
+
+    const response = await transport.fetch(URL, {
+      headers: { authorization: "must-not-leave-host", cookie: "must-not-leave-host" },
+      redirect: "follow",
+    });
+
+    expect(response.status).toBe(200);
   });
 });

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import Ajv from "ajv";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const X402_RUNTIME_VERSION = "2.20.0";
+const X402_RUNTIME_VERSION = "2.21.0";
 
 async function readJson(path) {
   return JSON.parse(await readFile(resolve(ROOT, path), "utf8"));

@@ -34,8 +34,8 @@ Version `0.1.x` is the current pre-publication line.
 
 ## Upstream dependency status
 
-The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.20.0`; both resolve
-`@x402/core` `2.20.0`. `@elizaos/core` remains an external peer dependency. At the 2026-08-08
+The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.21.0`; both resolve
+`@x402/core` `2.21.0`. `@elizaos/core` remains an external peer dependency. At the 2026-08-08
 baseline, `npm audit --omit=dev` reports zero known production vulnerabilities and the complete
 development tree reports no high-or-critical vulnerabilities. The development lockfile overrides
 the vulnerable transitive `pdfjs-dist` line to `6.2.108`, which requires Node.js 22.13.0 or newer;

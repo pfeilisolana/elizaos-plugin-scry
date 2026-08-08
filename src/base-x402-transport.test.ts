@@ -13,15 +13,23 @@ function signer() {
 }
 
 function paymentRequired(
-  overrides: { amount?: string; resourceUrl?: string; withBazaar?: boolean } = {},
+  overrides: {
+    amount?: string;
+    resourceUrl?: string;
+    withBazaar?: boolean;
+    richResource?: boolean;
+  } = {},
 ) {
+  const resourceUrl = overrides.resourceUrl ?? URL;
   return {
     x402Version: 2,
-    resource: {
-      url: overrides.resourceUrl ?? URL,
-      description: "Scry quick flag",
-      mimeType: "application/json",
-    },
+    resource: overrides.richResource
+      ? {
+          url: resourceUrl,
+          description: "Scry quick flag",
+          mimeType: "application/json",
+        }
+      : { url: resourceUrl },
     accepts: [
       {
         scheme: "exact",
@@ -62,7 +70,7 @@ function decodePayload(value: string): Record<string, unknown> {
 }
 
 describe("Scry Base x402 transport", () => {
-  it("selects Base V2 and preserves resource plus Bazaar metadata", async () => {
+  it("selects Base V2 and preserves the URL-only resource plus Bazaar metadata", async () => {
     const wallet = signer();
     const required = paymentRequired();
     let payload: Record<string, unknown> | undefined;
@@ -70,6 +78,7 @@ describe("Scry Base x402 transport", () => {
       const request = new Request(input);
       const signature = request.headers.get("payment-signature");
       if (!signature) return challenge(required);
+      expect(request.headers.has("x-payment")).toBe(false);
       payload = decodePayload(signature);
       return new Response('{"ok":true}', {
         status: 200,
@@ -98,6 +107,7 @@ describe("Scry Base x402 transport", () => {
         asset: BASE_USDC,
       },
     });
+    expect(payload?.resource).toEqual({ url: URL });
     expect(transport).toMatchObject({
       paymentMode: "x402",
       enforcedMaxPaymentUsd: 0.001,

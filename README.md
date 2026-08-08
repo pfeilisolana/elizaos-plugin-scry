@@ -13,8 +13,11 @@ repository contains the `0.1.0` release candidate. The npm package remains locke
 - Paid mode can use the included Base V2 transport or an injected x402-capable fetch. The plugin
   ceiling and the transport's independently enforced ceiling must be identical.
 - Paid mode also requires an explicit host attestation that the transport copies
-  `PaymentRequired.resource` unchanged into `PaymentPayload.resource`. A missing resource prevents
-  Bazaar discovery from associating a settlement with the purchased resource.
+  `PaymentRequired.resource` unchanged into `PaymentPayload.resource`. Scry emits the production
+  resource as `{ url }` only for Coinbase facilitator compatibility; rich descriptions, schemas,
+  branding, and route metadata remain in `extensions.bazaar` and the free discovery surfaces.
+- The included Base transport sends exactly one x402 v2 `PAYMENT-SIGNATURE` header. It never sends
+  `PAYMENT-SIGNATURE` and legacy `X-PAYMENT` together.
 - Paid mode also requires a cumulative session budget. Each eligible call reserves its catalog
   price synchronously before the opaque payment transport runs, so concurrent actions cannot
   multiply spending beyond that budget.
@@ -133,7 +136,7 @@ static capability provider returns the same structured routing fields plus lower
 more-complete alternatives. Agents should choose the narrowest product that fully answers the
 request, not the highest-priced product by default.
 
-The included transport is pinned to `@x402/fetch` and `@x402/evm` 2.20.0. It only selects Base
+The included transport is pinned to `@x402/fetch` and `@x402/evm` 2.21.0. It only selects Base
 mainnet (`eip155:8453`) exact USDC requirements, rejects challenge amounts above the declared
 ceiling before signing, requires the canonical Scry URL and Bazaar extension, and verifies that
 the generated payload preserves `resource`, `extensions.bazaar`, and `accepted` exactly.

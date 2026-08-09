@@ -34,8 +34,8 @@
     "pluginParameters": "none",
     "v2CompatibilityClaimed": false
   },
-  "authorities": {
-    "registryPullRequest": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_REGISTRY_PR"
+  "externalActions": {
+    "registryPullRequest": "explicit_bound_public_approval"
   },
   "requiredKeywords": [
     "elizaos",
@@ -99,7 +99,7 @@
     "environment": "npm-production",
     "node": "24",
     "npm": "11.5.1",
-    "configurationStatus": "pending",
+    "configurationStatus": "configured",
     "requiredFragments": [
       "workflow_dispatch:",
       "environment: npm-production",
@@ -120,8 +120,5 @@
       "Verify public version metadata"
     ]
   },
-  "stagedExternalBlockers": [
-    "npm_trusted_publisher_configuration_pending",
-    "current_registry_wire_requires_unproven_v2_runtime_compatibility"
-  ]
+  "stagedExternalBlockers": ["current_registry_wire_requires_unproven_v2_runtime_compatibility"]
 }

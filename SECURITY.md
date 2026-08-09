@@ -55,7 +55,7 @@ immutable version tag reachable from `main`, the `npm-production` GitHub environ
 11.5.1, pinned GitHub actions, OIDC trusted publishing, full release gates, and public metadata
 readback. The workflow contains no npm write token or generic GitHub secret reference and rejects
 automatic push, pull-request, schedule, and reusable-workflow triggers. npm package settings should
-disallow traditional token publishing after the trusted-publisher relationship is configured.
+disallow traditional token publishing; the OIDC publisher remains the only automated write path.
 
 ## Reporting
 

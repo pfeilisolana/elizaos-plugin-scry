@@ -413,8 +413,8 @@ function localErrors({
       if (policy.elizaosContract?.v2CompatibilityClaimed !== true) {
         errors.push("registry_v2_runtime_compatibility_not_proven");
       }
-      if (env.SCRY_REGISTRY_AUTHORITY !== policy.authorities.registryPullRequest) {
-        errors.push("registry_authority_missing");
+      if (env.SCRY_REGISTRY_APPROVED !== "true") {
+        errors.push("registry_approval_attestation_missing");
       }
       if (env.SCRY_PUBLISHED_PACKAGE !== `${policy.package}@${policy.version}`) {
         errors.push("published_package_attestation_missing");

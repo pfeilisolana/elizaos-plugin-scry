@@ -19,7 +19,7 @@ assert.deepEqual(npmIsolation, {
 assert.throws(() => isolatedNpmEnvironmentFor(""), /non-empty path/);
 const staged = buildReceipt(stagedInputs);
 assert.equal(staged.ok, true);
-assert.equal(staged.status, "published_release_trusted_publisher_pending");
+assert.equal(staged.status, "published_release_maintenance_ready");
 assert.equal(staged.privateLock, false);
 assert.equal(staged.publishReady, false);
 assert.deepEqual(staged.externalBlockers, stagedInputs.policy.stagedExternalBlockers);
@@ -56,7 +56,7 @@ const registry = buildReceipt({
   mode: "registry",
   packageJson: publishPackage,
   env: {
-    SCRY_REGISTRY_AUTHORITY: stagedInputs.policy.authorities.registryPullRequest,
+    SCRY_REGISTRY_APPROVED: "true",
     SCRY_PUBLISHED_PACKAGE: `${stagedInputs.policy.package}@${stagedInputs.policy.version}`,
     GITHUB_REPOSITORY: stagedInputs.policy.githubRepository,
   },
@@ -74,7 +74,7 @@ const registryWithoutAuthority = buildReceipt({
   env: {},
 });
 assert.equal(registryWithoutAuthority.ok, false);
-assert(registryWithoutAuthority.localErrors.includes("registry_authority_missing"));
+assert(registryWithoutAuthority.localErrors.includes("registry_approval_attestation_missing"));
 assert(registryWithoutAuthority.localErrors.includes("published_package_attestation_missing"));
 
 const invalidCandidate = { ...stagedInputs.candidate, unexpected: true };
@@ -260,7 +260,7 @@ assert.equal(automaticWorkflow.ok, false);
 assert(automaticWorkflow.localErrors.includes("trusted_workflow_unexpected_trigger"));
 
 const mismatchedPublisherState = structuredClone(stagedInputs.policy);
-mismatchedPublisherState.trustedPublishContract.configurationStatus = "configured";
+mismatchedPublisherState.trustedPublishContract.configurationStatus = "pending";
 const publisherState = buildReceipt({ ...stagedInputs, policy: mismatchedPublisherState });
 assert.equal(publisherState.ok, false);
 assert(publisherState.localErrors.includes("trusted_publisher_status_blocker_mismatch"));

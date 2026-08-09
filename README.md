@@ -179,9 +179,9 @@ implemented and proven; public npm installation does not depend on that catalogu
 The one-time token bootstrap workflow is retired after `0.1.0`. Future versions use the manually
 dispatched `.github/workflows/release.yml` on an immutable version tag, with npm trusted publishing
 over GitHub OIDC, no stored npm write token, no release cache, pinned actions/runtime, a full publish
-gate, duplicate-version rejection, and post-publish metadata verification. The workflow fails closed
-until the exact npm trusted-publisher relationship is configured for this repository, workflow, and
-`npm-production` environment.
+gate, duplicate-version rejection, and post-publish metadata verification. The trusted-publisher
+relationship is bound to `pfeilisolana/elizaos-plugin-scry`, `release.yml`, the `npm-production`
+environment, and the `npm publish` action only.
 
 `@elizaos/core` is a peer dependency. Development pins version `1.7.2` so CI tests the exact
 compatibility target rather than an unbounded `latest` release.

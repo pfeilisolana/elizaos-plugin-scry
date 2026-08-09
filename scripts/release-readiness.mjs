@@ -173,7 +173,7 @@ function localErrors({
   policy,
   schema,
   schemaBytes,
-  bootstrapWorkflowBytes,
+  trustedWorkflowBytes,
   logoBytes,
   bannerBytes,
   env = {},
@@ -185,25 +185,46 @@ function localErrors({
   if (gitBlobSha(schemaBytes) !== policy.registryContract.schema.blobSha) {
     errors.push("registry_schema_git_blob_mismatch");
   }
-  if (policy.bootstrapPublishContract?.workflow !== ".github/workflows/bootstrap-publish.yml") {
-    errors.push("bootstrap_workflow_path_mismatch");
+  if (policy.trustedPublishContract?.workflow !== ".github/workflows/release.yml") {
+    errors.push("trusted_workflow_path_mismatch");
   }
-  if (digest("sha256", bootstrapWorkflowBytes) !== policy.bootstrapPublishContract?.sha256) {
-    errors.push("bootstrap_workflow_sha256_mismatch");
+  if (digest("sha256", trustedWorkflowBytes) !== policy.trustedPublishContract?.sha256) {
+    errors.push("trusted_workflow_sha256_mismatch");
   }
-  const bootstrapWorkflow = bootstrapWorkflowBytes.toString("utf8");
-  for (const fragment of policy.bootstrapPublishContract?.requiredFragments ?? []) {
-    if (!bootstrapWorkflow.includes(fragment))
-      errors.push(`bootstrap_workflow_fragment_missing:${fragment}`);
+  const trustedWorkflow = trustedWorkflowBytes.toString("utf8");
+  for (const fragment of policy.trustedPublishContract?.requiredFragments ?? []) {
+    if (!trustedWorkflow.includes(fragment))
+      errors.push(`trusted_workflow_fragment_missing:${fragment}`);
+  }
+  if (/^\s{2}(push|pull_request|schedule|workflow_call):/m.test(trustedWorkflow)) {
+    errors.push("trusted_workflow_unexpected_trigger");
+  }
+  for (const forbidden of [
+    "NODE_AUTH_TOKEN",
+    "NPM_BOOTSTRAP_TOKEN",
+    "SCRY_PUBLISH_AUTHORITY",
+    "secrets.",
+  ]) {
+    if (trustedWorkflow.includes(forbidden)) {
+      errors.push(`trusted_workflow_forbidden_credential:${forbidden}`);
+    }
+  }
+  const trustedPublisherPending = policy.stagedExternalBlockers?.includes(
+    "npm_trusted_publisher_configuration_pending",
+  );
+  if (
+    (policy.trustedPublishContract?.configurationStatus === "pending") !==
+    trustedPublisherPending
+  ) {
+    errors.push("trusted_publisher_status_blocker_mismatch");
   }
   if (
-    policy.bootstrapPublishContract?.version !== policy.version ||
-    policy.bootstrapPublishContract?.tag !== policy.gitTag ||
-    policy.bootstrapPublishContract?.environment !== "npm-production" ||
-    policy.bootstrapPublishContract?.node !== "24" ||
-    policy.bootstrapPublishContract?.npm !== "11.5.1"
+    policy.trustedPublishContract?.environment !== "npm-production" ||
+    policy.trustedPublishContract?.node !== "24" ||
+    policy.trustedPublishContract?.npm !== "11.5.1" ||
+    !["pending", "configured"].includes(policy.trustedPublishContract?.configurationStatus)
   ) {
-    errors.push("bootstrap_workflow_contract_mismatch");
+    errors.push("trusted_workflow_contract_mismatch");
   }
   if (packageJson.name !== policy.package) errors.push("package_name_mismatch");
   const packageName = typeof packageJson.name === "string" ? packageJson.name.trim() : "";
@@ -384,9 +405,6 @@ function localErrors({
       errors.push("github_repository_context_mismatch");
     }
     if (mode === "publish") {
-      if (env.SCRY_PUBLISH_AUTHORITY !== policy.authorities.firstPublish) {
-        errors.push("publish_authority_missing");
-      }
       if (env.GITHUB_REF_TYPE !== "tag" || env.GITHUB_REF_NAME !== policy.gitTag) {
         errors.push("github_release_tag_mismatch");
       }
@@ -420,7 +438,9 @@ function buildReceipt(inputs) {
       errors.length > 0
         ? "local_contract_failed"
         : staged
-          ? "staged_public_publish_gated"
+          ? inputs.policy.trustedPublishContract?.configurationStatus === "configured"
+            ? "published_release_maintenance_ready"
+            : "published_release_trusted_publisher_pending"
           : registry
             ? "registry_context_ready"
             : "publish_context_ready",
@@ -438,14 +458,14 @@ function buildReceipt(inputs) {
 }
 
 async function loadInputs(mode, env = process.env) {
-  const [packageJson, metadata, candidate, policy, schemaBytes, bootstrapWorkflowBytes] =
+  const [packageJson, metadata, candidate, policy, schemaBytes, trustedWorkflowBytes] =
     await Promise.all([
       readJson("package.json"),
       readJson("release/package-metadata.candidate.json"),
       readJson("release/registry-entry.candidate.json"),
       readJson("release/release-policy.json"),
       readFile(resolve(ROOT, "release/registry-entry.schema.json")),
-      readFile(resolve(ROOT, ".github/workflows/bootstrap-publish.yml")),
+      readFile(resolve(ROOT, ".github/workflows/release.yml")),
     ]);
   const [logoBytes, bannerBytes] = await Promise.all([
     readOptionalBytes(policy.elizaosContract.registryAssets.logo.path),
@@ -459,7 +479,7 @@ async function loadInputs(mode, env = process.env) {
     policy,
     schema: JSON.parse(schemaBytes.toString("utf8")),
     schemaBytes,
-    bootstrapWorkflowBytes,
+    trustedWorkflowBytes,
     logoBytes,
     bannerBytes,
     env,

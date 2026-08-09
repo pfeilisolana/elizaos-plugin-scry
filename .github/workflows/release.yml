@@ -1,0 +1,130 @@
+name: npm release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type the exact package and version, for example @scrysolanahub/plugin-scry@0.1.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: npm-production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify immutable release request
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+
+          const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+          const expected = `${pkg.name}@${pkg.version}`;
+          const expectedTag = `v${pkg.version}`;
+          const failures = [];
+          if (pkg.name !== "@scrysolanahub/plugin-scry") failures.push("package_name_mismatch");
+          if (pkg.private === true) failures.push("private_package");
+          if (process.env.GITHUB_REF_TYPE !== "tag") failures.push("release_ref_is_not_tag");
+          if (process.env.GITHUB_REF_NAME !== expectedTag) failures.push("release_tag_mismatch");
+          if (process.env.CONFIRMATION !== expected) failures.push("release_confirmation_mismatch");
+          if (process.env.GITHUB_REPOSITORY !== "pfeilisolana/elizaos-plugin-scry") {
+            failures.push("release_repository_mismatch");
+          }
+          if (failures.length > 0) {
+            console.error(JSON.stringify({ ok: false, failures }));
+            process.exit(1);
+          }
+          console.log(JSON.stringify({ ok: true, package: expected, tag: expectedTag }));
+          NODE
+          git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Pin trusted-publishing-compatible npm
+        run: npm install --global npm@11.5.1
+
+      - name: Verify npm runtime
+        run: test "$(npm --version)" = "11.5.1"
+
+      - name: Install without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=low
+
+      - name: Verify version is not already published
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+
+          const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+          const url = `https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`;
+          const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(10_000) });
+          if (response.status === 404) {
+            console.log(JSON.stringify({ ok: true, unpublished: `${pkg.name}@${pkg.version}` }));
+            process.exit(0);
+          }
+          console.error(JSON.stringify({ ok: false, status: response.status, package: `${pkg.name}@${pkg.version}` }));
+          process.exit(1);
+          NODE
+
+      - name: Run full publish gate
+        run: npm run release:publish-gate
+
+      - name: Publish through npm trusted publishing
+        run: npm publish --access public --provenance --ignore-scripts
+
+      - name: Verify public version metadata
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+
+          const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+          const url = `https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`;
+          let metadata = null;
+          for (let attempt = 1; attempt <= 6; attempt += 1) {
+            const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(10_000) });
+            if (response.status === 200) {
+              metadata = await response.json();
+              break;
+            }
+            if (response.status !== 404) throw new Error(`registry_status_${response.status}`);
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
+          }
+          if (
+            metadata?.name !== pkg.name ||
+            metadata?.version !== pkg.version ||
+            metadata?.repository?.url !== pkg.repository.url ||
+            typeof metadata?.dist?.integrity !== "string"
+          ) {
+            console.error(JSON.stringify({ ok: false, error: "published_metadata_mismatch" }));
+            process.exit(1);
+          }
+          console.log(
+            JSON.stringify({
+              ok: true,
+              package: `${metadata.name}@${metadata.version}`,
+              integrity: metadata.dist.integrity,
+            }),
+          );
+          NODE

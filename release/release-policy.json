@@ -35,8 +35,6 @@
     "v2CompatibilityClaimed": false
   },
   "authorities": {
-    "createRepository": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_CREATE_REPO",
-    "firstPublish": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_FIRST_PUBLISH",
     "registryPullRequest": "GO_ELIZAOS_PLUGIN_SCRY_0_1_0_REGISTRY_PR"
   },
   "requiredKeywords": [
@@ -95,36 +93,35 @@
       "Open a pull request"
     ]
   },
-  "bootstrapPublishContract": {
-    "workflow": ".github/workflows/bootstrap-publish.yml",
-    "sha256": "f9a8ff87d609d99984ec129d5aa2593b38014988d4bd978779370ddd37089ea6",
-    "version": "0.1.0",
-    "tag": "v0.1.0",
+  "trustedPublishContract": {
+    "workflow": ".github/workflows/release.yml",
+    "sha256": "c015f949aa15a055e9290e7a0bd10d3b543a4f2eec5749d10d79986144780179",
     "environment": "npm-production",
     "node": "24",
     "npm": "11.5.1",
+    "configurationStatus": "pending",
     "requiredFragments": [
       "workflow_dispatch:",
       "environment: npm-production",
       "id-token: write",
-      "test \"$GITHUB_REF_TYPE\" = \"tag\"",
-      "test \"$GITHUB_REF_NAME\" = \"v0.1.0\"",
-      "test \"$CONFIRMATION\" = \"@scrysolanahub/plugin-scry@0.1.0\"",
+      "process.env.GITHUB_REF_TYPE !== \"tag\"",
+      "process.env.GITHUB_REF_NAME !== expectedTag",
+      "process.env.CONFIRMATION !== expected",
+      "git merge-base --is-ancestor \"$GITHUB_SHA\" refs/remotes/origin/main",
+      "fetch-depth: 0",
       "persist-credentials: false",
       "package-manager-cache: false",
       "npm install --global npm@11.5.1",
-      "npm publish --access public --provenance",
-      "NPM_BOOTSTRAP_TOKEN",
-      "SCRY_PUBLISH_AUTHORITY"
+      "npm ci --ignore-scripts",
+      "npm audit --omit=dev --audit-level=low",
+      "Verify version is not already published",
+      "npm run release:publish-gate",
+      "npm publish --access public --provenance --ignore-scripts",
+      "Verify public version metadata"
     ]
   },
   "stagedExternalBlockers": [
-    "package_name_not_claimed",
-    "npm_bootstrap_token_not_configured",
-    "future_trusted_publisher_requires_first_package_version",
-    "official_elizaos_plugins_submit_unreleased_or_not_verified",
-    "current_registry_wire_requires_unproven_v2_runtime_compatibility",
-    "first_publish_authority_not_granted",
-    "registry_pull_request_authority_not_granted"
+    "npm_trusted_publisher_configuration_pending",
+    "current_registry_wire_requires_unproven_v2_runtime_compatibility"
   ]
 }

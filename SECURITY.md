@@ -47,6 +47,16 @@ published artifact. CI blocks any high-or-critical development-tree regression a
 low-or-higher production-tree regression. Silently widening x402 versions, using an unreleased
 framework build, or downgrading the framework to suppress an audit is not acceptable.
 
+## Release supply chain
+
+The `0.1.0` bootstrap credential was temporary and is no longer part of the repository or GitHub
+environment. Future npm versions are bound to the manually dispatched `release.yml` workflow, an
+immutable version tag reachable from `main`, the `npm-production` GitHub environment, Node 24, npm
+11.5.1, pinned GitHub actions, OIDC trusted publishing, full release gates, and public metadata
+readback. The workflow contains no npm write token or generic GitHub secret reference and rejects
+automatic push, pull-request, schedule, and reusable-workflow triggers. npm package settings should
+disallow traditional token publishing after the trusted-publisher relationship is configured.
+
 ## Reporting
 
 Use GitHub private vulnerability reporting for the canonical public repository. Do not open a

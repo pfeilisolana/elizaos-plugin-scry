@@ -19,7 +19,7 @@ assert.deepEqual(npmIsolation, {
 assert.throws(() => isolatedNpmEnvironmentFor(""), /non-empty path/);
 const staged = buildReceipt(stagedInputs);
 assert.equal(staged.ok, true);
-assert.equal(staged.status, "staged_public_publish_gated");
+assert.equal(staged.status, "published_release_trusted_publisher_pending");
 assert.equal(staged.privateLock, false);
 assert.equal(staged.publishReady, false);
 assert.deepEqual(staged.externalBlockers, stagedInputs.policy.stagedExternalBlockers);
@@ -30,7 +30,6 @@ const publish = buildReceipt({
   mode: "publish",
   packageJson: publishPackage,
   env: {
-    SCRY_PUBLISH_AUTHORITY: stagedInputs.policy.authorities.firstPublish,
     GITHUB_REPOSITORY: stagedInputs.policy.githubRepository,
     GITHUB_REF_TYPE: "tag",
     GITHUB_REF_NAME: stagedInputs.policy.gitTag,
@@ -42,15 +41,15 @@ assert.equal(publish.status, "publish_context_ready");
 assert.equal(publish.publishReady, true);
 assert.equal(publish.registryReady, false);
 
-const noAuthority = buildReceipt({
+const noContext = buildReceipt({
   ...stagedInputs,
   mode: "publish",
   packageJson: publishPackage,
   env: {},
 });
-assert.equal(noAuthority.ok, false);
-assert(noAuthority.localErrors.includes("publish_authority_missing"));
-assert(noAuthority.localErrors.includes("github_actions_context_missing"));
+assert.equal(noContext.ok, false);
+assert(noContext.localErrors.includes("github_actions_context_missing"));
+assert(noContext.localErrors.includes("github_release_tag_mismatch"));
 
 const registry = buildReceipt({
   ...stagedInputs,
@@ -229,12 +228,42 @@ const tamperedLogo = buildReceipt({
 assert.equal(tamperedLogo.ok, false);
 assert(tamperedLogo.localErrors.includes("elizaos_logo_sha256_mismatch"));
 
-const tamperedBootstrapWorkflow = buildReceipt({
+const tamperedTrustedWorkflow = buildReceipt({
   ...stagedInputs,
-  bootstrapWorkflowBytes: Buffer.concat([stagedInputs.bootstrapWorkflowBytes, Buffer.from("\n")]),
+  trustedWorkflowBytes: Buffer.concat([stagedInputs.trustedWorkflowBytes, Buffer.from("\n")]),
 });
-assert.equal(tamperedBootstrapWorkflow.ok, false);
-assert(tamperedBootstrapWorkflow.localErrors.includes("bootstrap_workflow_sha256_mismatch"));
+assert.equal(tamperedTrustedWorkflow.ok, false);
+assert(tamperedTrustedWorkflow.localErrors.includes("trusted_workflow_sha256_mismatch"));
+
+const credentialedWorkflow = buildReceipt({
+  ...stagedInputs,
+  trustedWorkflowBytes: Buffer.concat([
+    stagedInputs.trustedWorkflowBytes,
+    Buffer.from("\n# NODE_AUTH_TOKEN\n"),
+  ]),
+});
+assert.equal(credentialedWorkflow.ok, false);
+assert(
+  credentialedWorkflow.localErrors.includes(
+    "trusted_workflow_forbidden_credential:NODE_AUTH_TOKEN",
+  ),
+);
+
+const automaticWorkflow = buildReceipt({
+  ...stagedInputs,
+  trustedWorkflowBytes: Buffer.concat([
+    stagedInputs.trustedWorkflowBytes,
+    Buffer.from("\n  push:\n    tags: ['v*']\n"),
+  ]),
+});
+assert.equal(automaticWorkflow.ok, false);
+assert(automaticWorkflow.localErrors.includes("trusted_workflow_unexpected_trigger"));
+
+const mismatchedPublisherState = structuredClone(stagedInputs.policy);
+mismatchedPublisherState.trustedPublishContract.configurationStatus = "configured";
+const publisherState = buildReceipt({ ...stagedInputs, policy: mismatchedPublisherState });
+assert.equal(publisherState.ok, false);
+assert(publisherState.localErrors.includes("trusted_publisher_status_blocker_mismatch"));
 
 const missingConsumerSmoke = structuredClone(stagedInputs.packageJson);
 delete missingConsumerSmoke.scripts["release:consumer-smoke"];
@@ -247,5 +276,5 @@ assert(consumerSmoke.localErrors.includes("consumer_smoke_release_gate_missing")
 assert(consumerSmoke.localErrors.includes("consumer_smoke_publish_gate_missing"));
 
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 32 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 35 })}\n`,
 );

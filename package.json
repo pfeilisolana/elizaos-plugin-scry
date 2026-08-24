@@ -69,14 +69,14 @@
     "postcss": "8.5.23"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.5",
+    "@biomejs/biome": "2.5.9",
     "@elizaos/core": "1.7.2",
     "@types/node": "20.19.43",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.11",
     "ajv": "8.20.0",
     "tsup": "8.5.1",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "keywords": [
     "elizaos",

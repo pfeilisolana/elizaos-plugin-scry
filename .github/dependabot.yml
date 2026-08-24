@@ -1,26 +1,21 @@
 version: 2
 
-# Routine version updates share one low-noise maintenance PR. Dependabot
-# security updates remain controlled separately by the repository security
-# settings and are not delayed by this schedule.
-multi-ecosystem-groups:
-  monthly-maintenance:
-    schedule:
-      interval: monthly
-      time: "06:17"
-      timezone: Europe/Berlin
+# Keep each package manager on the same low-noise monthly schedule. The npm
+# entry stays a normal single-ecosystem update so its x402 runtime group is
+# honored; Dependabot ignores nested `groups` for multi-ecosystem updates.
+# Security updates remain controlled separately by the repository settings.
 
 updates:
   - package-ecosystem: npm
     directory: /
-    patterns:
-      - "*"
-    multi-ecosystem-group: monthly-maintenance
+    schedule:
+      interval: monthly
+      time: "06:17"
+      timezone: Europe/Berlin
     open-pull-requests-limit: 5
-    # Incident 2026-08-03: separate @x402/evm and @x402/fetch PRs split one
+    # Incidents 2026-08-03 and 2026-08-24: separate @x402/evm and @x402/fetch PRs split one
     # runtime release and tripped the exact-version safety gate. Owner: Codex
-    # Scry lane. Review by 2026-08-31; remove if Dependabot groups these pins
-    # reliably without an explicit rule.
+    # Scry lane. Keep this group while both packages share one runtime pin.
     groups:
       x402-runtime:
         applies-to: version-updates
@@ -36,7 +31,8 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
-    patterns:
-      - "*"
-    multi-ecosystem-group: monthly-maintenance
+    schedule:
+      interval: monthly
+      time: "06:17"
+      timezone: Europe/Berlin
     open-pull-requests-limit: 3

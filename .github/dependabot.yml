@@ -21,6 +21,13 @@ updates:
         applies-to: version-updates
         patterns:
           - "@x402/*"
+      # Incident 2026-08-28: Vitest and its coverage provider declare exact peer
+      # versions, so separate updates cannot be installed. Keep them atomic.
+      vitest-suite:
+        applies-to: version-updates
+        patterns:
+          - "vitest"
+          - "@vitest/coverage-v8"
     ignore:
       - dependency-name: "@types/node"
         update-types:

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import Ajv from "ajv";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const X402_RUNTIME_VERSION = "2.23.0";
+const X402_RUNTIME_VERSION = "2.25.0";
 
 async function readJson(path) {
   return JSON.parse(await readFile(resolve(ROOT, path), "utf8"));
@@ -168,6 +168,7 @@ function registryCandidateFromPackage(packageJson) {
 function localErrors({
   mode,
   packageJson,
+  readme,
   metadata,
   candidate,
   policy,
@@ -375,6 +376,9 @@ function localErrors({
   if (packageJson.dependencies?.["@x402/evm"] !== X402_RUNTIME_VERSION) {
     errors.push("x402_evm_pin_mismatch");
   }
+  if (!readme.includes(`pinned to \`@x402/fetch\` and \`@x402/evm\` ${X402_RUNTIME_VERSION}`)) {
+    errors.push("x402_readme_pin_mismatch");
+  }
   if (packageJson.scripts?.prepack !== "npm run build") errors.push("prepack_build_gate_missing");
   if (packageJson.scripts?.prepublishOnly !== "npm run release:publish-gate") {
     errors.push("prepublish_gate_missing");
@@ -458,9 +462,10 @@ function buildReceipt(inputs) {
 }
 
 async function loadInputs(mode, env = process.env) {
-  const [packageJson, metadata, candidate, policy, schemaBytes, trustedWorkflowBytes] =
+  const [packageJson, readme, metadata, candidate, policy, schemaBytes, trustedWorkflowBytes] =
     await Promise.all([
       readJson("package.json"),
+      readFile(resolve(ROOT, "README.md"), "utf8"),
       readJson("release/package-metadata.candidate.json"),
       readJson("release/registry-entry.candidate.json"),
       readJson("release/release-policy.json"),
@@ -474,6 +479,7 @@ async function loadInputs(mode, env = process.env) {
   return {
     mode,
     packageJson,
+    readme,
     metadata,
     candidate,
     policy,

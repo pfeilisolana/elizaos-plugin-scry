@@ -174,6 +174,13 @@ const evmPin = buildReceipt({ ...stagedInputs, packageJson: wrongEvmPin });
 assert.equal(evmPin.ok, false);
 assert(evmPin.localErrors.includes("x402_evm_pin_mismatch"));
 
+const staleReadmePin = buildReceipt({
+  ...stagedInputs,
+  readme: stagedInputs.readme.replace("2.25.0", "2.24.0"),
+});
+assert.equal(staleReadmePin.ok, false);
+assert(staleReadmePin.localErrors.includes("x402_readme_pin_mismatch"));
+
 const invalidElizaMetadata = structuredClone(stagedInputs.packageJson);
 delete invalidElizaMetadata.elizaos.kind;
 delete invalidElizaMetadata.exports["./package.json"];

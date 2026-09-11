@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "package": "@scrysolanahub/plugin-scry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "githubRepository": "pfeilisolana/elizaos-plugin-scry",
-  "gitTag": "v0.1.0",
+  "gitTag": "v0.1.1",
   "elizaosContract": {
     "releaseLine": "stable-v1",
     "core": "1.7.2",

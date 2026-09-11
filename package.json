@@ -1,6 +1,6 @@
 {
   "name": "@scrysolanahub/plugin-scry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Budget-safe ElizaOS actions for Scry Solana wallet, mint, cohort, and funding evidence over x402",
   "type": "module",

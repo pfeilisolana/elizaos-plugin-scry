@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Version `0.1.x` is the current pre-publication line.
+Version `0.1.1` is the current public patch on the `0.1.x` line.
 
 ## Threat boundaries
 
@@ -34,18 +34,20 @@ Version `0.1.x` is the current pre-publication line.
 
 ## Upstream dependency status
 
-The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.21.0`; both resolve
-`@x402/core` `2.21.0`. `@elizaos/core` remains an external peer dependency. At the 2026-08-08
+The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.23.0`; both resolve
+`@x402/core` `2.23.0`. `@elizaos/core` remains an external peer dependency. At the 2026-09-11
 baseline, `npm audit --omit=dev` reports zero known production vulnerabilities and the complete
-development tree reports no high-or-critical vulnerabilities. The development lockfile overrides
-the vulnerable transitive `pdfjs-dist` line to `6.2.108`, which requires Node.js 22.13.0 or newer;
-the plugin runtime and CI support floor matches that requirement. The remaining five low-severity
-audit nodes all trace to the same `elliptic` advisory in the pinned `@elizaos/core@1.7.2`
-development host. No fixed stable `elliptic` or compatible stable ElizaOS Core release exists at
-this baseline. The plugin build externalizes ElizaOS Core, so this tree is not bundled in the
+development tree reports no high-or-critical vulnerabilities after the lockfile override of
+transitive `fast-uri` to `3.1.7`. The development lockfile also overrides the vulnerable
+transitive `pdfjs-dist` line to `6.2.108`, which requires Node.js 22.13.0 or newer; the plugin
+runtime and CI support floor matches that requirement. The remaining five low-severity audit
+nodes all trace to the same `elliptic` advisory in the pinned `@elizaos/core@1.7.2` development
+host. No fixed stable `elliptic` or compatible stable ElizaOS Core release exists at this
+baseline. The plugin build externalizes ElizaOS Core, so this tree is not bundled in the
 published artifact. CI blocks any high-or-critical development-tree regression and any
-low-or-higher production-tree regression. Silently widening x402 versions, using an unreleased
-framework build, or downgrading the framework to suppress an audit is not acceptable.
+low-or-higher production-tree regression. Silently widening x402 versions (including the open
+Dependabot `2.24.0` bump), using an unreleased framework build, or downgrading the framework to
+suppress an audit is not acceptable.
 
 ## Release supply chain
 

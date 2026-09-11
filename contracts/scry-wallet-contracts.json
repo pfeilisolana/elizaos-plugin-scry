@@ -1959,6 +1959,10 @@
           "supported": {
             "type": "boolean"
           },
+          "token_control_map": {
+            "description": "Cache-only launch-slot token-flow and entity-link aggregation. Wallet-scoped cache coverage stays partial unless a mint-complete source is explicitly present. Percentages require finalized slot-bound current-supply evidence reused from mint risk; no additional provider call is made by this layer.",
+            "type": "object"
+          },
           "unsupported_reason": {
             "type": [
               "string",
@@ -1974,6 +1978,7 @@
           "launch_preflight",
           "creator_context",
           "launch_window_evidence",
+          "token_control_map",
           "coverage",
           "evidence_pack",
           "agent_decision_support",
@@ -1987,7 +1992,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "69044dfdb5440329383390c77631aacf83f5e9eda8346c0af42c31a0ac6d4330",
+  "contractsSha256": "6883ca2d4d91e4da84d27a7bb2bd0efc1898d9a6ee7607a0d5192b47c7f7ab1f",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

@@ -283,9 +283,9 @@ function localErrors({
   if (
     policy.registryContract.generator?.source !==
       "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts" ||
-    policy.registryContract.generator?.blobSha !== "cb9a27c2ece776bd1ba406e6210b7e74d7c069fd" ||
+    policy.registryContract.generator?.blobSha !== "6dbf3f07279a862ff06495ceb8b32f3fcd54e47b" ||
     policy.registryContract.generator?.sha256 !==
-      "a8c81e5c6ee8534b64005ac29edc449e18ef27935dd97f865ff06d900e5602a2" ||
+      "18264b8baf423a8436a6bbae9ff610594710915f91b3b465cb42a91cf3fd843c" ||
     !policy.registryContract.generator?.requiredFragments?.includes(
       "supports: { v0: false, v1: false, v2: true }",
     ) ||

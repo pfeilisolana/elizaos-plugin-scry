@@ -268,6 +268,9 @@ async function main() {
     );
     const packed = JSON.parse(packOutput);
     assert.equal(packed.length, 1, "npm pack must produce exactly one tarball");
+    const packageJson = JSON.parse(await readFile(resolve(ROOT, "package.json"), "utf8"));
+    assert.equal(packed[0]?.name, packageJson.name);
+    assert.equal(packed[0]?.version, packageJson.version);
     const tarballName = packed[0]?.filename;
     assert.equal(typeof tarballName, "string");
     const tarball = join(temp, tarballName);
@@ -316,7 +319,7 @@ async function main() {
       `${JSON.stringify({
         schema: "scry.elizaos-consumer-smoke.v1",
         ok: true,
-        package: "@scrysolanahub/plugin-scry@0.1.0",
+        package: `${packed[0]?.name}@${packed[0]?.version}`,
         tarballSha256: createHash("sha256").update(tarballBytes).digest("hex"),
         hostCore: "@elizaos/core@1.7.2",
         hostCoreTarballSha256: createHash("sha256").update(coreTarballBytes).digest("hex"),

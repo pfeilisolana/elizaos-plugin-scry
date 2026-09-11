@@ -205,6 +205,7 @@ export const SCRY_PRODUCTS = {
       "launch_preflight",
       "creator_context",
       "launch_window_evidence",
+      "token_control_map",
       "coverage",
       "evidence_pack",
       "agent_decision_support",

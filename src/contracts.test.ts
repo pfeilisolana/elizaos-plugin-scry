@@ -8,7 +8,7 @@ const WALLET = "4BdKaxN8G6ka4GYtQQWk4G4dZRUTX2vQH9GcXdBREFUk";
 describe("pinned Scry response contracts", () => {
   it("binds runtime validation to the deterministic manifest snapshot", () => {
     expect(SCRY_CONTRACTS_SHA256).toBe(
-      "69044dfdb5440329383390c77631aacf83f5e9eda8346c0af42c31a0ac6d4330",
+      "6883ca2d4d91e4da84d27a7bb2bd0efc1898d9a6ee7607a0d5192b47c7f7ab1f",
     );
   });
 
@@ -56,6 +56,18 @@ describe("pinned Scry response contracts", () => {
     expect(result.valid).toBe(false);
     if (result.valid) throw new Error("Expected pathway-posture rejection");
     expect(result.errors).toContain("/evidence_pathways/posture failed const");
+  });
+
+  it("requires token_control_map on the pumpfun launch dossier", () => {
+    const definition = SCRY_PRODUCTS.SCRY_PUMPFUN_LAUNCH_DOSSIER;
+    const evidence = validEvidenceFor(definition);
+    delete evidence.token_control_map;
+
+    const result = validateScryContract(definition.product, evidence);
+
+    expect(result.valid).toBe(false);
+    if (result.valid) throw new Error("Expected token_control_map rejection");
+    expect(result.errors).toContain("$ failed required");
   });
 
   it("enforces paid coverage metadata on premium evidence", () => {

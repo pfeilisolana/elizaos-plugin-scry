@@ -34,8 +34,8 @@ Version `0.1.1` is the current public patch on the `0.1.x` line.
 
 ## Upstream dependency status
 
-The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.23.0`; both resolve
-`@x402/core` `2.23.0`. `@elizaos/core` remains an external peer dependency. At the 2026-09-11
+The Base V2 transport pins `@x402/fetch` and `@x402/evm` to `2.25.0`; both resolve
+`@x402/core` `2.25.0`. `@elizaos/core` remains an external peer dependency. At the 2026-09-12
 baseline, `npm audit --omit=dev` reports zero known production vulnerabilities and the complete
 development tree reports no high-or-critical vulnerabilities after the lockfile override of
 transitive `fast-uri` to `3.1.7`. The development lockfile also overrides the vulnerable
@@ -45,8 +45,8 @@ nodes all trace to the same `elliptic` advisory in the pinned `@elizaos/core@1.7
 host. No fixed stable `elliptic` or compatible stable ElizaOS Core release exists at this
 baseline. The plugin build externalizes ElizaOS Core, so this tree is not bundled in the
 published artifact. CI blocks any high-or-critical development-tree regression and any
-low-or-higher production-tree regression. Silently widening x402 versions (including the open
-Dependabot `2.24.0` bump), using an unreleased framework build, or downgrading the framework to
+low-or-higher production-tree regression. Silently widening future x402 versions, using an
+unreleased framework build, or downgrading the framework to
 suppress an audit is not acceptable.
 
 ## Release supply chain

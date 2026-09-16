@@ -87,6 +87,18 @@ describe("pinned Scry response contracts", () => {
     );
   });
 
+  it("requires the Pump.fun Token Control map", () => {
+    const definition = SCRY_PRODUCTS.SCRY_PUMPFUN_LAUNCH_DOSSIER;
+    const evidence = validEvidenceFor(definition, WALLET);
+    delete evidence.token_control_map;
+
+    const result = validateScryContract(definition.product, evidence);
+
+    expect(result.valid).toBe(false);
+    if (result.valid) throw new Error("Expected token-control rejection");
+    expect(result.errors).toContain("$ failed required");
+  });
+
   it("accepts explicit bounded holdings without promoting the lower bound to an exact count", () => {
     const definition = SCRY_PRODUCTS.SCRY_WALLET_FORENSICS;
     const evidence = validEvidenceFor(definition, WALLET);

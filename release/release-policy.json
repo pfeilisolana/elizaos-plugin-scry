@@ -68,8 +68,8 @@
     },
     "readme": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/README.md",
-      "blobSha": "02aeb283650d6c2820d32a91a4262bed9779602c",
-      "sha256": "a4a1f14732c16b6ea64c23d49f0fd31539c14dda121ae3efc0c20d51dbdf0b39"
+      "blobSha": "5cac2a79822bdcccaffc5cec4c641e7df4323ccc",
+      "sha256": "4475deae2de392e1d5febe7ea7e8d8b8bf7580358e372360604966261d60691d"
     },
     "generator": {
       "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts",

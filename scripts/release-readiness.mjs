@@ -283,7 +283,7 @@ function localErrors({
   }
   if (
     policy.registryContract.generator?.source !==
-      "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts" ||
+      "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/src/generate.ts" ||
     policy.registryContract.generator?.blobSha !== "6dbf3f07279a862ff06495ceb8b32f3fcd54e47b" ||
     policy.registryContract.generator?.sha256 !==
       "18264b8baf423a8436a6bbae9ff610594710915f91b3b465cb42a91cf3fd843c" ||

@@ -56,7 +56,7 @@ package identity from `package.json`.
 
 The compatibility target is deliberately split by release line. Runtime and consumer tests pin the
 current stable `@elizaos/core` and CLI at `1.7.2`; this package does not claim the separate 2.x/alpha
-manifest contract. The current community-registry source of truth is the `develop` branch contract
+manifest contract. The current community-registry source of truth is the `main` branch contract
 under `elizaOS/eliza/packages/registry`, not the archived standalone registry.
 
 The registry pull request must contain exactly two reviewed files: the new third-party entry and
@@ -68,7 +68,7 @@ The current generator marks every third-party entry as v2-only (`v1: false`, `v2
 fail-closed until a separate v2 compatibility line passes its own runtime and consumer gates or the
 upstream wire contract changes. npm publication for stable v1 does not imply registry eligibility.
 
-The upstream `elizaos plugins submit . --dry-run` command is documented on `develop` but is not
+The upstream `elizaos plugins submit . --dry-run` command is documented on `main` but is not
 present in the published stable CLI `1.7.2`. The older stable `elizaos publish --dry-run` still
 generates the retired registry format and rejects the now-documented unscoped
 `plugin-*` convention for the package basename. It is therefore not used as release authority. The candidate entry is

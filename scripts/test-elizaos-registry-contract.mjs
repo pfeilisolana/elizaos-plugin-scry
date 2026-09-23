@@ -22,7 +22,7 @@ const policy = {
   githubRepository: "pfeilisolana/elizaos-plugin-scry",
   registryContract: {
     repository: "elizaOS/eliza",
-    branch: "develop",
+    branch: "main",
     entryDirectory: "packages/registry/entries/third-party",
     submissionFilename: "scrysolanahub__plugin-scry.json",
     schema: {

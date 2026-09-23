@@ -51,7 +51,7 @@
   ],
   "registryContract": {
     "repository": "elizaOS/eliza",
-    "branch": "develop",
+    "branch": "main",
     "entryDirectory": "packages/registry/entries/third-party",
     "submissionFilename": "scrysolanahub__plugin-scry.json",
     "generatedRegistryPath": "packages/registry/generated-registry.json",
@@ -62,17 +62,17 @@
       "currentReleaseEligible": false
     },
     "schema": {
-      "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/schema/registry-entry.schema.json",
+      "source": "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/schema/registry-entry.schema.json",
       "blobSha": "493339a35f47c6996e4b0f255bb2448d8dcc4eab",
       "sha256": "8361a617c918ef7c682fbb623d6ad13fe27cbe1f8e5316db02d9f1db7ae356af"
     },
     "readme": {
-      "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/README.md",
+      "source": "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/README.md",
       "blobSha": "02aeb283650d6c2820d32a91a4262bed9779602c",
       "sha256": "a4a1f14732c16b6ea64c23d49f0fd31539c14dda121ae3efc0c20d51dbdf0b39"
     },
     "generator": {
-      "source": "https://raw.githubusercontent.com/elizaOS/eliza/develop/packages/registry/src/generate.ts",
+      "source": "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/src/generate.ts",
       "blobSha": "6dbf3f07279a862ff06495ceb8b32f3fcd54e47b",
       "sha256": "18264b8baf423a8436a6bbae9ff610594710915f91b3b465cb42a91cf3fd843c",
       "requiredFragments": [

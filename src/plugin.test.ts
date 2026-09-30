@@ -262,11 +262,11 @@ describe("ElizaOS plugin", () => {
 
     expect(unpaid).toMatchObject({
       success: false,
-      text: expect.stringContaining("catalog price of $0.001"),
+      text: expect.stringContaining("catalog price of $0.005"),
       values: {
         scryStatus: "payment_required",
         scryProduct: definition.product,
-        scryCatalogPriceUsd: 0.001,
+        scryCatalogPriceUsd: 0.005,
         scryQuoteNetworks: ["solana:mainnet", "eip155:8453"],
         scryChallengePriceVerified: false,
         scryPaymentAttempted: false,
@@ -280,11 +280,11 @@ describe("ElizaOS plugin", () => {
     expect(unpaid.text).toContain("host-owned Base signer");
     expect(unpaidCallback).toHaveBeenCalledOnce();
     expect(unpaidCallback).toHaveBeenCalledWith({
-      text: expect.stringContaining("catalog price of $0.001"),
+      text: expect.stringContaining("catalog price of $0.005"),
       actions: [definition.actionName],
       scryStatus: "payment_required",
       scryProduct: definition.product,
-      scryCatalogPriceUsd: 0.001,
+      scryCatalogPriceUsd: 0.005,
       scryQuoteNetworks: ["solana:mainnet", "eip155:8453"],
       scryChallengePriceVerified: false,
       scryPaymentAttempted: false,

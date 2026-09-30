@@ -34,7 +34,7 @@ function paymentRequired(
       {
         scheme: "exact",
         network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
-        amount: overrides.amount ?? "1000",
+        amount: overrides.amount ?? "5000",
         asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         payTo: "CTKigV78yuErumvqm7Qor8j1hMK2oxNxdhwpVrAKV85d",
         maxTimeoutSeconds: 900,
@@ -43,7 +43,7 @@ function paymentRequired(
       {
         scheme: "exact",
         network: "eip155:8453",
-        amount: overrides.amount ?? "1000",
+        amount: overrides.amount ?? "5000",
         asset: BASE_USDC,
         payTo: PAY_TO,
         maxTimeoutSeconds: 900,
@@ -87,7 +87,7 @@ describe("Scry Base x402 transport", () => {
     });
     const transport = createScryBaseX402Transport({
       signer: wallet,
-      maxPaymentUsd: 0.001,
+      maxPaymentUsd: 0.005,
       fetch: network as unknown as typeof fetch,
     });
 
@@ -103,14 +103,14 @@ describe("Scry Base x402 transport", () => {
       accepted: {
         scheme: "exact",
         network: "eip155:8453",
-        amount: "1000",
+        amount: "5000",
         asset: BASE_USDC,
       },
     });
     expect(payload?.resource).toEqual({ url: URL });
     expect(transport).toMatchObject({
       paymentMode: "x402",
-      enforcedMaxPaymentUsd: 0.001,
+      enforcedMaxPaymentUsd: 0.005,
       paymentPayloadResource: "payment-required-resource-exact",
       paymentPriceBinding: "catalog-route-exact",
     });
@@ -152,7 +152,7 @@ describe("Scry Base x402 transport", () => {
     const network = vi.fn(async () => challenge(required));
     const transport = createScryBaseX402Transport({
       signer: wallet,
-      maxPaymentUsd: 0.001,
+      maxPaymentUsd: 0.005,
       fetch: network as unknown as typeof fetch,
     });
 
@@ -169,7 +169,7 @@ describe("Scry Base x402 transport", () => {
     const network = vi.fn(async () => challenge(required));
     const transport = createScryBaseX402Transport({
       signer: wallet,
-      maxPaymentUsd: 0.001,
+      maxPaymentUsd: 0.005,
       fetch: network as unknown as typeof fetch,
     });
 
@@ -222,7 +222,7 @@ describe("Scry Base x402 transport", () => {
     const network = vi.fn(async () => new Response());
     const transport = createScryBaseX402Transport({
       signer: signer(),
-      maxPaymentUsd: 0.001,
+      maxPaymentUsd: 0.005,
       fetch: network as unknown as typeof fetch,
     });
 
@@ -240,7 +240,7 @@ describe("Scry Base x402 transport", () => {
     expect(() =>
       createScryBaseX402Transport({
         signer: { ...signer(), address: "0xinvalid" as `0x${string}` },
-        maxPaymentUsd: 0.001,
+        maxPaymentUsd: 0.005,
       }),
     ).toThrow("valid EVM address");
   });
@@ -254,7 +254,7 @@ describe("Scry Base x402 transport", () => {
     });
     const transport = createScryBaseX402Transport({
       signer: signer(),
-      maxPaymentUsd: 0.001,
+      maxPaymentUsd: 0.005,
       fetch: network as unknown as typeof fetch,
     });
 

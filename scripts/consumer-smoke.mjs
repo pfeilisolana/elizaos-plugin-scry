@@ -65,7 +65,7 @@ function paymentRequired() {
       {
         scheme: "exact",
         network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
-        amount: "1000",
+        amount: "5000",
         asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         payTo: "CTKigV78yuErumvqm7Qor8j1hMK2oxNxdhwpVrAKV85d",
         maxTimeoutSeconds: 900,
@@ -74,7 +74,7 @@ function paymentRequired() {
       {
         scheme: "exact",
         network: "eip155:8453",
-        amount: "1000",
+        amount: "5000",
         asset: BASE_USDC,
         payTo: "0xF4A904d8326786d90157cf791C281302F11b2036",
         maxTimeoutSeconds: 900,
@@ -209,13 +209,13 @@ async function verifyInstalledPackage(consumerDir) {
   };
   const transport = pluginPackage.createScryBaseX402Transport({
     signer,
-    maxPaymentUsd: 0.001,
+    maxPaymentUsd: 0.005,
     fetch: fakeFetch,
   });
   const client = pluginPackage.createScryClient({
     transport,
-    maxPaymentUsd: 0.001,
-    sessionBudgetUsd: 0.001,
+    maxPaymentUsd: 0.005,
+    sessionBudgetUsd: 0.005,
   });
   const result = await client.query(pluginPackage.SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG, WALLET);
 
@@ -224,7 +224,7 @@ async function verifyInstalledPackage(consumerDir) {
   assert.deepEqual(observedPayload.resource, required.resource);
   assert.deepEqual(observedPayload.extensions, required.extensions);
   assert.equal(observedPayload.accepted.network, "eip155:8453");
-  assert.equal(observedPayload.accepted.amount, "1000");
+  assert.equal(observedPayload.accepted.amount, "5000");
   assert.equal(observedPayload.accepted.asset, BASE_USDC);
 
   let contractDeliveryFetches = 0;

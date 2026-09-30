@@ -286,7 +286,7 @@
         "type": "object"
       },
       "path": "/x402/wallet/:address/quick-flag",
-      "priceUsd": 0.001,
+      "priceUsd": 0.005,
       "product": "scry_wallet_quick_flag"
     },
     {
@@ -1992,7 +1992,7 @@
       "product": "scry_pumpfun_launch_dossier"
     }
   ],
-  "contractsSha256": "6883ca2d4d91e4da84d27a7bb2bd0efc1898d9a6ee7607a0d5192b47c7f7ab1f",
+  "contractsSha256": "fd0f94e3afff9a6847f60f4617995e720b7bf74cad52df5a38e43466ff222562",
   "schemaVersion": 1,
   "sourceUrl": "https://scry.solanahub.de/.well-known/x402.json"
 }

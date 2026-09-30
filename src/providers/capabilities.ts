@@ -30,7 +30,7 @@ export const scryCapabilitiesProvider: Provider = {
     );
     return {
       text: [
-        "Scry provides neutral Solana wallet, mint, and cohort evidence through seven x402 products, starting with a $0.001 prefilter.",
+        "Scry provides neutral Solana wallet, mint, and cohort evidence through seven x402 products, starting with a $0.005 prefilter.",
         "Choose the narrowest product that fully matches the caller's intent; use Full Context only when combined wallet evidence is explicitly required.",
         "The $0.05 preflight ceiling excludes the $0.18, $0.20, and $0.30 products; full-catalog access requires an explicit $0.30 per-request ceiling.",
         "A 402 response is a payment challenge, never proof of settlement.",

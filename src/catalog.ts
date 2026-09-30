@@ -10,7 +10,7 @@ export const SCRY_PRODUCTS = {
     inputKind: "wallet",
     routeTemplate: "/x402/wallet/:address/quick-flag",
     subjectField: "address",
-    priceUsd: 0.001,
+    priceUsd: 0.005,
     description:
       "Retrieve Scry's lowest-cost neutral wallet prefilter before deciding whether deeper evidence is warranted.",
     buyerIntent: "Triage one wallet at the lowest catalog cost before choosing deeper evidence.",

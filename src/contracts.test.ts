@@ -8,7 +8,7 @@ const WALLET = "4BdKaxN8G6ka4GYtQQWk4G4dZRUTX2vQH9GcXdBREFUk";
 describe("pinned Scry response contracts", () => {
   it("binds runtime validation to the deterministic manifest snapshot", () => {
     expect(SCRY_CONTRACTS_SHA256).toBe(
-      "6883ca2d4d91e4da84d27a7bb2bd0efc1898d9a6ee7607a0d5192b47c7f7ab1f",
+      "fd0f94e3afff9a6847f60f4617995e720b7bf74cad52df5a38e43466ff222562",
     );
   });
 

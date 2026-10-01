@@ -95,7 +95,7 @@
   },
   "trustedPublishContract": {
     "workflow": ".github/workflows/release.yml",
-    "sha256": "c015f949aa15a055e9290e7a0bd10d3b543a4f2eec5749d10d79986144780179",
+    "sha256": "89bcec7797878ecafcecb25971a2f8e7d2ce3a530b6b610961580dddf2a491da",
     "environment": "npm-production",
     "node": "24",
     "npm": "11.5.1",
@@ -117,7 +117,9 @@
       "Verify version is not already published",
       "npm run release:publish-gate",
       "npm publish --access public --provenance --ignore-scripts",
-      "Verify public version metadata"
+      "Verify public version metadata",
+      "attempt <= 30",
+      "maxAttempts: 30"
     ]
   },
   "stagedExternalBlockers": ["current_registry_wire_requires_unproven_v2_runtime_compatibility"]

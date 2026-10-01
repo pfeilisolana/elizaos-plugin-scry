@@ -102,8 +102,10 @@ jobs:
           const pkg = JSON.parse(readFileSync("package.json", "utf8"));
           const url = `https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`;
           let metadata = null;
-          for (let attempt = 1; attempt <= 6; attempt += 1) {
+          let lastStatus = null;
+          for (let attempt = 1; attempt <= 30; attempt += 1) {
             const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(10_000) });
+            lastStatus = response.status;
             if (response.status === 200) {
               metadata = await response.json();
               break;
@@ -117,7 +119,14 @@ jobs:
             metadata?.repository?.url !== pkg.repository.url ||
             typeof metadata?.dist?.integrity !== "string"
           ) {
-            console.error(JSON.stringify({ ok: false, error: "published_metadata_mismatch" }));
+            console.error(
+              JSON.stringify({
+                ok: false,
+                error: "published_metadata_mismatch",
+                lastStatus,
+                maxAttempts: 30,
+              }),
+            );
             process.exit(1);
           }
           console.log(

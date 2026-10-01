@@ -41,7 +41,7 @@ publish gate, an immutable Git tag, npm provenance, and post-publish consumer ve
 
 | Action | Product | Price ceiling needed |
 | --- | --- | ---: |
-| `SCRY_WALLET_QUICK_FLAG` | Lowest-cost wallet prefilter | $0.001 |
+| `SCRY_WALLET_QUICK_FLAG` | Lowest-cost wallet prefilter | $0.005 |
 | `SCRY_WALLET_LINEAGE` | Funding lineage | $0.03 |
 | `SCRY_WALLET_FORENSICS` | Wallet forensics | $0.05 |
 | `SCRY_LAUNCH_WINDOW_CLUSTER` | Launch-window cluster evidence | $0.05 |

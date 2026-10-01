@@ -260,9 +260,9 @@ describe("Scry client", () => {
     const definition = SCRY_PRODUCTS.SCRY_WALLET_QUICK_FLAG;
     const fake = transport(jsonResponse(validEvidenceFor(definition, WALLET)));
     const client = createScryClient({
-      transport: x402Transport(fake.fetch, 0.001),
-      maxPaymentUsd: 0.001,
-      sessionBudgetUsd: 0.002,
+      transport: x402Transport(fake.fetch, 0.005),
+      maxPaymentUsd: 0.005,
+      sessionBudgetUsd: 0.01,
     });
 
     expect((await client.query(definition, WALLET)).ok).toBe(true);
@@ -273,7 +273,7 @@ describe("Scry client", () => {
     });
     expect(fake.mock).toHaveBeenCalledTimes(2);
     expect(client.getBudgetState()).toMatchObject({
-      reservedPaymentUsd: 0.002,
+      reservedPaymentUsd: 0.01,
       remainingBudgetUsd: 0,
     });
   });

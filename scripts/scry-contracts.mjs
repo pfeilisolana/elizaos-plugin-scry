@@ -20,7 +20,7 @@ const EXPECTED = [
     exportName: "validateWalletQuickFlag",
     path: "/x402/wallet/:address/quick-flag",
     product: "scry_wallet_quick_flag",
-    priceUsd: 0.001,
+    priceUsd: 0.005,
   },
   {
     key: "walletForensics",

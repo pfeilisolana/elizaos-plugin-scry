@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Version `0.1.1` is the current public patch on the `0.1.x` line.
+Version `0.1.2` is the maintained patch on the `0.1.x` line.
 
 ## Threat boundaries
 

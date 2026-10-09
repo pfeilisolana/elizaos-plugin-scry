@@ -35,7 +35,7 @@
     "v2CompatibilityClaimed": false
   },
   "externalActions": {
-    "registryPullRequest": "explicit_bound_public_approval"
+    "registryPullRequest": "retired_upstream_not_available"
   },
   "requiredKeywords": [
     "elizaos",
@@ -91,7 +91,21 @@
       "elizaos plugins submit . --dry-run",
       "The runtime auto-discovers any npm package whose `keywords` include `elizaos`",
       "Open a pull request"
-    ]
+    ],
+    "retirement": {
+      "mergedCommit": "9533b52f4ffda6655644c14a416db7ef49c09db2",
+      "source": "https://raw.githubusercontent.com/elizaOS/eliza/main/README.md",
+      "requiredFragments": [
+        "We no longer accept third-party plugins or registry items",
+        "listing updates, and registry submission tooling",
+        "will be closed as out of scope"
+      ],
+      "expectedUnavailableSources": [
+        "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/schema/registry-entry.schema.json",
+        "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/README.md",
+        "https://raw.githubusercontent.com/elizaOS/eliza/main/packages/registry/src/generate.ts"
+      ]
+    }
   },
   "trustedPublishContract": {
     "workflow": ".github/workflows/release.yml",
@@ -122,5 +136,5 @@
       "maxAttempts: 30"
     ]
   },
-  "stagedExternalBlockers": ["current_registry_wire_requires_unproven_v2_runtime_compatibility"]
+  "stagedExternalBlockers": ["upstream_third_party_registry_retired"]
 }

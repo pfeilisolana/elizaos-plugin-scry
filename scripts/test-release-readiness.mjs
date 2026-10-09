@@ -65,7 +65,7 @@ assert.equal(registry.ok, false);
 assert.equal(registry.status, "local_contract_failed");
 assert.equal(registry.registryReady, false);
 assert.equal(registry.publishReady, false);
-assert(registry.localErrors.includes("registry_v2_runtime_compatibility_not_proven"));
+assert(registry.localErrors.includes("upstream_registry_retired"));
 
 const registryWithoutAuthority = buildReceipt({
   ...stagedInputs,
@@ -74,8 +74,7 @@ const registryWithoutAuthority = buildReceipt({
   env: {},
 });
 assert.equal(registryWithoutAuthority.ok, false);
-assert(registryWithoutAuthority.localErrors.includes("registry_approval_attestation_missing"));
-assert(registryWithoutAuthority.localErrors.includes("published_package_attestation_missing"));
+assert(registryWithoutAuthority.localErrors.includes("upstream_registry_retired"));
 
 const invalidCandidate = { ...stagedInputs.candidate, unexpected: true };
 assert(
@@ -161,6 +160,12 @@ wrongGeneratorPolicy.registryContract.generator.sha256 = "0".repeat(64);
 const wrongGenerator = buildReceipt({ ...stagedInputs, policy: wrongGeneratorPolicy });
 assert.equal(wrongGenerator.ok, false);
 assert(wrongGenerator.localErrors.includes("registry_generator_contract_mismatch"));
+
+const wrongRetirementPolicy = structuredClone(stagedInputs.policy);
+wrongRetirementPolicy.registryContract.retirement.mergedCommit = "0".repeat(40);
+const wrongRetirement = buildReceipt({ ...stagedInputs, policy: wrongRetirementPolicy });
+assert.equal(wrongRetirement.ok, false);
+assert(wrongRetirement.localErrors.includes("registry_retirement_contract_mismatch"));
 
 const wrongFetchPin = structuredClone(stagedInputs.packageJson);
 wrongFetchPin.dependencies["@x402/fetch"] = "^2.20.0";

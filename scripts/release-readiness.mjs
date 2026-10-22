@@ -221,7 +221,7 @@ function localErrors({
   }
   if (
     policy.trustedPublishContract?.environment !== "npm-production" ||
-    policy.trustedPublishContract?.node !== "24" ||
+    policy.trustedPublishContract?.node !== "24.22.1" ||
     policy.trustedPublishContract?.npm !== "11.5.1" ||
     !["pending", "configured"].includes(policy.trustedPublishContract?.configurationStatus)
   ) {

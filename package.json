@@ -25,11 +25,13 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=22.13.0"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   },
   "scripts": {
+    "security:node": "node scripts/check-node-security-floor.mjs",
+    "test:node-security": "node --test scripts/check-node-security-floor.test.mjs",
     "build": "tsup",
-    "check": "npm run contracts:test && npm run release:readiness:test && npm run release:registry-test && npm run contracts:verify && npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run security:node && npm run test:node-security && npm run contracts:test && npm run release:readiness:test && npm run release:registry-test && npm run contracts:verify && npm run typecheck && npm run lint && npm test && npm run build",
     "contracts:check": "node scripts/scry-contracts.mjs check",
     "contracts:sync": "node scripts/scry-contracts.mjs sync",
     "contracts:test": "node scripts/test-scry-contracts.mjs",
@@ -72,11 +74,11 @@
     "@biomejs/biome": "2.5.14",
     "@elizaos/core": "1.7.2",
     "@types/node": "20.19.43",
-    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/coverage-v8": "4.1.12",
     "ajv": "8.20.0",
     "tsup": "8.5.1",
     "typescript": "5.9.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "keywords": [
     "elizaos",

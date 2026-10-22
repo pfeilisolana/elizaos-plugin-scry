@@ -55,7 +55,8 @@ release gate. Runtime contract validation fails closed if the service response d
 ## Compatibility and installation
 
 This `0.1.x` line targets the current stable ElizaOS v1 runtime: `@elizaos/core` `1.7.2`. CI tests
-Node.js 22 and 24; Node.js 22.13.0 is the minimum supported runtime. ElizaOS 2.x/alpha
+Node.js 22.23.4 and 24.22.1. Supported runtime floors are Node.js 22.23.4, 24.22.1, and 26.12.1;
+earlier and unsupported major versions are rejected by the security gate. ElizaOS 2.x/alpha
 compatibility is not claimed by this release line. The
 package is ESM-only; CommonJS hosts must load it with dynamic `import()` rather than `require()`.
 
@@ -154,7 +155,8 @@ ledger. Recreate the client only after reviewing ambiguous payment outcomes.
 
 ## Development
 
-Requires Node.js 22.13.0 or newer.
+Requires a supported patched runtime: Node.js 22.23.4+, 24.22.1+, or 26.12.1+ within those
+major lines. `.node-version` pins local development to 22.23.4.
 
 ```sh
 npm ci

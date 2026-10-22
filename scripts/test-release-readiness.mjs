@@ -266,6 +266,12 @@ const automaticWorkflow = buildReceipt({
 assert.equal(automaticWorkflow.ok, false);
 assert(automaticWorkflow.localErrors.includes("trusted_workflow_unexpected_trigger"));
 
+const unsafePublisherRuntime = structuredClone(stagedInputs.policy);
+unsafePublisherRuntime.trustedPublishContract.node = "24";
+const unsafePublisher = buildReceipt({ ...stagedInputs, policy: unsafePublisherRuntime });
+assert.equal(unsafePublisher.ok, false);
+assert(unsafePublisher.localErrors.includes("trusted_workflow_contract_mismatch"));
+
 const mismatchedPublisherState = structuredClone(stagedInputs.policy);
 mismatchedPublisherState.trustedPublishContract.configurationStatus = "pending";
 const publisherState = buildReceipt({ ...stagedInputs, policy: mismatchedPublisherState });
@@ -283,5 +289,5 @@ assert(consumerSmoke.localErrors.includes("consumer_smoke_release_gate_missing")
 assert(consumerSmoke.localErrors.includes("consumer_smoke_publish_gate_missing"));
 
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 35 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-release-readiness-test.v1", ok: true, tests: 36 })}\n`,
 );

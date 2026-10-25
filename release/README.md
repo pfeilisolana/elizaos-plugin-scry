@@ -1,6 +1,7 @@
 # Release staging contract
 
-These files prepare, but do not authorize, an npm publish or ElizaOS registry submission.
+These files prepare npm releases and preserve the historical ElizaOS registry contract as evidence.
+ElizaOS retired third-party registry submissions on 2026-09-23.
 
 - `registry-entry.schema.json` is pinned to official ElizaOS blob
   `346e276709e2d97b0a59c05c18c9c14c78365584`.
@@ -23,11 +24,11 @@ that no publication can bypass the prepublish gate. `npm run release:publish-che
 unless `private` is explicitly false and the exact GitHub tag and first-publish authority
 environment is present. Neither command performs a network request or write.
 
-`npm run release:registry-check` performs a free read-only check against the mutable upstream
-ElizaOS registry schema and README. It rejects byte drift, semantic route drift, invalid UTF-8,
-non-200 responses, body stalls, and oversized responses. `npm run release:registry-gate` additionally
-requires proof that the exact npm version exists plus the separate registry-PR authority. It never
-publishes or opens a PR.
+`npm run release:registry-check` performs a free read-only check of the official retirement notice
+and confirms that the former schema, README, and generator return 404 or 410. It fails closed on a
+missing notice, unexpected source availability, transport failure, invalid UTF-8, body stalls, or
+oversized responses. `npm run release:registry-gate` always fails while the upstream third-party
+registry is retired. It never publishes or opens a PR.
 
 `npm run release:consumer-smoke` uses an isolated temporary npm user config,
 cache, and log directory, then packs the built artifact and the exact installed
@@ -41,9 +42,9 @@ removes credential-shaped environment variables and uses an empty temporary npm 
 package import or child-process execution. The temporary project and tarballs are deleted on success
 or failure. Both the general release check and the publish gate require this buyer-boundary proof.
 
-Publishing and registry submission are separate external writes and require separate explicit
-authorization. A registry entry is not evidence of public listing, installation, selection,
-payment, settlement, or external demand.
+Publishing is a separate external write and requires explicit authorization. Registry submission
+is no longer offered upstream. Historical registry material is not evidence of public listing,
+installation, selection, payment, settlement, or external demand.
 
 The public repository's `npm-production` environment requires approval by `pfeilisolana` and
 accepts only the exact `v0.1.0` tag. It stores no publish credential. The first bootstrap publish
@@ -54,10 +55,9 @@ the `@scrysolanahub` scope is controlled by the existing npm account. The GitHub
 does not need to mirror the npm basename because publication and registry submission use the
 package identity from `package.json`.
 
-The compatibility target is deliberately split by release line. Runtime and consumer tests pin the
-current stable `@elizaos/core` and CLI at `1.7.2`; this package does not claim the separate 2.x/alpha
-manifest contract. The current community-registry source of truth is the `main` branch contract
-under `elizaOS/eliza/packages/registry`, not the archived standalone registry.
+Runtime and consumer tests pin the current stable `@elizaos/core` and CLI at `1.7.2`; this package
+does not claim the separate 2.x/alpha manifest contract. ElizaOS now limits its catalog to
+first-party capabilities and does not accept third-party registry items.
 
 The registry pull request must contain exactly two reviewed files: the new third-party entry and
 the deterministically regenerated `packages/registry/generated-registry.json`. Submitting only the

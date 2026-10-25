@@ -61,6 +61,44 @@ async function fetchBounded(
   }
 }
 
+async function fetchStatus(url, { fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetchImpl(url, {
+      headers: { accept: "application/json,text/plain;q=0.9" },
+      redirect: "error",
+      signal: controller.signal,
+    });
+    await response.body?.cancel();
+    return response.status;
+  } catch {
+    throw new Error("upstream_transport_failed");
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function retirementErrors(policy, { fetchImpl = fetch } = {}) {
+  const retirement = policy.registryContract?.retirement;
+  if (!retirement) return ["registry_retirement_contract_missing"];
+
+  const errors = [];
+  const readme = decodeUtf8(await fetchBounded(retirement.source, { fetchImpl }));
+  for (const fragment of retirement.requiredFragments ?? []) {
+    if (!readme.includes(fragment)) errors.push(`upstream_retirement_notice_missing:${fragment}`);
+  }
+  const statuses = await Promise.all(
+    (retirement.expectedUnavailableSources ?? []).map((url) => fetchStatus(url, { fetchImpl })),
+  );
+  for (const [index, status] of statuses.entries()) {
+    if (status !== 404 && status !== 410) {
+      errors.push(`retired_registry_source_available:${index}:${status}`);
+    }
+  }
+  return [...new Set(errors)].sort();
+}
+
 function contractErrors({
   policy,
   localSchemaBytes,
@@ -151,6 +189,7 @@ async function buildContractReceipt(options = {}) {
   let remoteReadmeBytes;
   let remoteGeneratorBytes;
   let metadata;
+  let registryRetired = false;
   try {
     [remoteSchemaBytes, remoteReadmeBytes, remoteGeneratorBytes] = await Promise.all([
       fetchBounded(contract.schema.source, { fetchImpl }),
@@ -172,7 +211,22 @@ async function buildContractReceipt(options = {}) {
       errors.push(...npmErrors(metadata, policy));
     }
   } catch (error) {
-    errors.push(error instanceof Error ? error.message : "registry_contract_check_failed");
+    if (error instanceof Error && error.message === "upstream_non_200") {
+      try {
+        const retirementCheckErrors = await retirementErrors(policy, { fetchImpl });
+        errors.push(...retirementCheckErrors);
+        registryRetired = retirementCheckErrors.length === 0;
+        if (requirePublished) errors.push("upstream_registry_retired");
+      } catch (retirementError) {
+        errors.push(
+          retirementError instanceof Error
+            ? retirementError.message
+            : "registry_retirement_check_failed",
+        );
+      }
+    } else {
+      errors.push(error instanceof Error ? error.message : "registry_contract_check_failed");
+    }
   }
 
   const uniqueErrors = [...new Set(errors)].sort();
@@ -182,13 +236,19 @@ async function buildContractReceipt(options = {}) {
     status:
       uniqueErrors.length > 0
         ? "upstream_contract_failed"
-        : requirePublished
-          ? "published_registry_prerequisites_verified"
-          : "upstream_contract_verified",
+        : registryRetired
+          ? "upstream_registry_retirement_verified"
+          : requirePublished
+            ? "published_registry_prerequisites_verified"
+            : "upstream_contract_verified",
     package: `${policy.package}@${policy.version}`,
     repository: contract.repository,
     branch: contract.branch,
-    submissionPath: `${contract.entryDirectory}/${contract.submissionFilename}`,
+    submissionPath: registryRetired
+      ? null
+      : `${contract.entryDirectory}/${contract.submissionFilename}`,
+    registryAvailable: !registryRetired,
+    registryRetired,
     schemaSha256: remoteSchemaBytes ? digest("sha256", remoteSchemaBytes) : null,
     readmeSha256: remoteReadmeBytes ? digest("sha256", remoteReadmeBytes) : null,
     generatorSha256: remoteGeneratorBytes ? digest("sha256", remoteGeneratorBytes) : null,
@@ -209,7 +269,16 @@ async function run(mode) {
   }
 }
 
-export { buildContractReceipt, contractErrors, decodeUtf8, fetchBounded, gitBlobSha, npmErrors };
+export {
+  buildContractReceipt,
+  contractErrors,
+  decodeUtf8,
+  fetchBounded,
+  fetchStatus,
+  gitBlobSha,
+  npmErrors,
+  retirementErrors,
+};
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {
   await run(process.argv[2] ?? "check");

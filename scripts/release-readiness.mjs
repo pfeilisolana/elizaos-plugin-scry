@@ -294,6 +294,16 @@ function localErrors({
   ) {
     errors.push("registry_generator_contract_mismatch");
   }
+  if (
+    policy.externalActions?.registryPullRequest !== "retired_upstream_not_available" ||
+    policy.registryContract?.retirement?.mergedCommit !==
+      "9533b52f4ffda6655644c14a416db7ef49c09db2" ||
+    policy.registryContract?.retirement?.source !==
+      "https://raw.githubusercontent.com/elizaOS/eliza/main/README.md" ||
+    !policy.stagedExternalBlockers?.includes("upstream_third_party_registry_retired")
+  ) {
+    errors.push("registry_retirement_contract_mismatch");
+  }
 
   for (const keyword of policy.requiredKeywords) {
     if (!packageJson.keywords?.includes(keyword)) errors.push(`missing_keyword:${keyword}`);
@@ -414,15 +424,7 @@ function localErrors({
       }
       if (env.GITHUB_ACTIONS !== "true") errors.push("github_actions_context_missing");
     } else {
-      if (policy.elizaosContract?.v2CompatibilityClaimed !== true) {
-        errors.push("registry_v2_runtime_compatibility_not_proven");
-      }
-      if (env.SCRY_REGISTRY_APPROVED !== "true") {
-        errors.push("registry_approval_attestation_missing");
-      }
-      if (env.SCRY_PUBLISHED_PACKAGE !== `${policy.package}@${policy.version}`) {
-        errors.push("published_package_attestation_missing");
-      }
+      errors.push("upstream_registry_retired");
     }
   } else {
     errors.push("unknown_release_mode");
@@ -453,7 +455,7 @@ function buildReceipt(inputs) {
     registrySubmissionPath: `${inputs.policy.registryContract.entryDirectory}/${inputs.policy.registryContract.submissionFilename}`,
     privateLock: inputs.packageJson.private === true,
     publishReady: inputs.mode === "publish" && errors.length === 0,
-    registryReady: registry && errors.length === 0,
+    registryReady: false,
     localErrors: errors,
     externalBlockers: staged ? inputs.policy.stagedExternalBlockers : [],
     network: false,

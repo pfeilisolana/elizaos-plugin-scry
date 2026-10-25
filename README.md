@@ -172,11 +172,11 @@ closed on path, product, price, output-schema drift, invalid encoding, or a resp
 MiB. `contracts:sync` is the explicit maintainer operation that updates the snapshot and generated
 validators after reviewed contract changes.
 
-`release:registry-check` independently verifies the current ElizaOS monorepo registry schema and
-submission instructions against pinned bytes and semantics. The current community-registry wire
-advertises v2-only compatibility, while this package truthfully targets stable ElizaOS `1.7.2`.
-Registry submission therefore remains intentionally blocked until v2 runtime compatibility is
-implemented and proven; public npm installation does not depend on that catalogue entry.
+`release:registry-check` independently verifies ElizaOS's current public retirement notice for
+third-party registry items and confirms that the former schema, instructions, and generator remain
+unavailable. ElizaOS retired community listings and submission tooling on 2026-09-23. Registry
+submission is therefore unavailable; public npm installation remains the supported distribution
+path for this package.
 
 The one-time token bootstrap workflow is retired after `0.1.0`. Future versions use the manually
 dispatched `.github/workflows/release.yml` on an immutable version tag, with npm trusted publishing

@@ -27,6 +27,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.22.1"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
       - name: Verify immutable release request
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
@@ -54,11 +60,10 @@ jobs:
           NODE
           git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24"
-          registry-url: https://registry.npmjs.org
-          package-manager-cache: false
+      - name: Reject an unsafe Node runtime before dependencies
+        run: node scripts/check-node-security-floor.mjs
+
+      - run: node --test scripts/check-node-security-floor.test.mjs
 
       - name: Pin trusted-publishing-compatible npm
         run: npm install --global npm@11.5.1
@@ -102,8 +107,10 @@ jobs:
           const pkg = JSON.parse(readFileSync("package.json", "utf8"));
           const url = `https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`;
           let metadata = null;
-          for (let attempt = 1; attempt <= 6; attempt += 1) {
+          let lastStatus = null;
+          for (let attempt = 1; attempt <= 30; attempt += 1) {
             const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(10_000) });
+            lastStatus = response.status;
             if (response.status === 200) {
               metadata = await response.json();
               break;
@@ -117,7 +124,14 @@ jobs:
             metadata?.repository?.url !== pkg.repository.url ||
             typeof metadata?.dist?.integrity !== "string"
           ) {
-            console.error(JSON.stringify({ ok: false, error: "published_metadata_mismatch" }));
+            console.error(
+              JSON.stringify({
+                ok: false,
+                error: "published_metadata_mismatch",
+                lastStatus,
+                maxAttempts: 30,
+              }),
+            );
             process.exit(1);
           }
           console.log(

@@ -6,6 +6,7 @@ import {
   fetchBounded,
   gitBlobSha,
   npmErrors,
+  retirementErrors,
 } from "./elizaos-registry-contract.mjs";
 
 const schemaBytes = Buffer.from('{"type":"object"}\n');
@@ -54,6 +55,15 @@ const policy = {
       "auto discovery",
       "open pr",
     ],
+    retirement: {
+      source: "https://example.test/current-readme",
+      requiredFragments: ["no third-party registry"],
+      expectedUnavailableSources: [
+        "https://example.test/schema",
+        "https://example.test/readme",
+        "https://example.test/generator",
+      ],
+    },
   },
 };
 
@@ -139,6 +149,30 @@ const receipt = await buildContractReceipt({
 assert.equal(receipt.ok, true);
 assert.equal(receipt.publishedPackageVerified, true);
 
+const retiredFetch = async (url) => {
+  if (url.endsWith("/current-readme")) return new Response("no third-party registry\n");
+  return new Response("gone", { status: 404 });
+};
+assert.deepEqual(await retirementErrors(policy, { fetchImpl: retiredFetch }), []);
+const retiredReceipt = await buildContractReceipt({
+  policy,
+  localSchemaBytes: schemaBytes,
+  fetchImpl: retiredFetch,
+});
+assert.equal(retiredReceipt.ok, true);
+assert.equal(retiredReceipt.registryRetired, true);
+assert.equal(retiredReceipt.registryAvailable, false);
+assert.equal(retiredReceipt.submissionPath, null);
+
+const retiredRegistryGate = await buildContractReceipt({
+  policy,
+  localSchemaBytes: schemaBytes,
+  fetchImpl: retiredFetch,
+  requirePublished: true,
+});
+assert.equal(retiredRegistryGate.ok, false);
+assert(retiredRegistryGate.errors.includes("upstream_registry_retired"));
+
 process.stdout.write(
-  `${JSON.stringify({ schema: "scry.elizaos-registry-contract-test.v1", ok: true, tests: 10 })}\n`,
+  `${JSON.stringify({ schema: "scry.elizaos-registry-contract-test.v1", ok: true, tests: 16 })}\n`,
 );

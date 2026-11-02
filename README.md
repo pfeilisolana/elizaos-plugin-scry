@@ -55,7 +55,8 @@ release gate. Runtime contract validation fails closed if the service response d
 ## Compatibility and installation
 
 This `0.1.x` line targets the current stable ElizaOS v1 runtime: `@elizaos/core` `1.7.2`. CI tests
-Node.js 22 and 24; Node.js 22.13.0 is the minimum supported runtime. ElizaOS 2.x/alpha
+Node.js 22.23.4 and 24.22.1. Supported runtime floors are Node.js 22.23.4, 24.22.1, and 26.12.1;
+earlier and unsupported major versions are rejected by the security gate. ElizaOS 2.x/alpha
 compatibility is not claimed by this release line. The
 package is ESM-only; CommonJS hosts must load it with dynamic `import()` rather than `require()`.
 
@@ -154,7 +155,8 @@ ledger. Recreate the client only after reviewing ambiguous payment outcomes.
 
 ## Development
 
-Requires Node.js 22.13.0 or newer.
+Requires a supported patched runtime: Node.js 22.23.4+, 24.22.1+, or 26.12.1+ within those
+major lines. `.node-version` pins local development to 22.23.4.
 
 ```sh
 npm ci
@@ -170,11 +172,11 @@ closed on path, product, price, output-schema drift, invalid encoding, or a resp
 MiB. `contracts:sync` is the explicit maintainer operation that updates the snapshot and generated
 validators after reviewed contract changes.
 
-`release:registry-check` independently verifies the current ElizaOS monorepo registry schema and
-submission instructions against pinned bytes and semantics. The current community-registry wire
-advertises v2-only compatibility, while this package truthfully targets stable ElizaOS `1.7.2`.
-Registry submission therefore remains intentionally blocked until v2 runtime compatibility is
-implemented and proven; public npm installation does not depend on that catalogue entry.
+`release:registry-check` independently verifies ElizaOS's current public retirement notice for
+third-party registry items and confirms that the former schema, instructions, and generator remain
+unavailable. ElizaOS retired community listings and submission tooling on 2026-09-23. Registry
+submission is therefore unavailable; public npm installation remains the supported distribution
+path for this package.
 
 The one-time token bootstrap workflow is retired after `0.1.0`. Future versions use the manually
 dispatched `.github/workflows/release.yml` on an immutable version tag, with npm trusted publishing
